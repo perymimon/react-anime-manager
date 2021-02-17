@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+## ANIME
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Finally, Solved the issue with animation in react. Basically the problem of managing exit and entry of components to the
+page, List or solo, so that they can be animated.
 
-## Available Scripts
+The solution writes basis on hooks-only, ~240 lines in one file , so you can fork it out expand it and share it back.
+The solution currently manages adding and removing css classes for the revolutionary `xyzAnime` library
 
-In the project directory, you can run:
+No dependency at all beside `React` itself
 
-### `npm start`
+`Anime` components remember the last childes components and compare it to new list of components Then split it to 3
+lists , `added` `removed`, and `union` then add the corresponding class to each list:
+`classIn`, `classOut` and for the other it calculates the diff `x` `y` and put it on css variables, so it will be easy
+to use it on animation.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Examples
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```jsx
+import '@animxyz/core'
+import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
+import Anime from './Anime.js';
 
-### `npm test`
+function App() {
+    const [list, setList] = useState([1, 2, 3, 4, 5])
+    const counter = useRef(list.length)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    function add() {
+        let pos = ~~(Math.random() * list.length);
+        list.splice(pos,0,++counter.current)
+        setList(list);
+    }
 
-### `npm run build`
+    function remove() {
+        let pos = ~~(Math.random() * list.length);
+        setList(list.filter( (c,i)=> i!== pos ));
+    }
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    return (
+        <div className="App">
+            <button onClick={add}>add in random</button>
+            <button onClick={remove}>remove from random</button>
+            <h1>list</h1>
+            <ol className="list-1">
+                <Anime xyz="appear-stagger-2 narrow-50%"
+                       classIn="xyz-in"
+                       classOut="xyz-out xyz-absolute">
+                    {list.map((number) => (
+                        <li key={'key' + number} className="item">{number}</li>
+                    ))}
+                </Anime>
+            </ol>
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+        </div>
+    );
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export default App;
+```
 
-### `npm run eject`
+There are a couple of property (with there default) the Component can take :
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+`classIn = 'xyz-in'`  - class to put on each `new` element.       
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`classOut = 'xyz-out'` - class to put on each `removed` element.     
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+`classAppear = 'xyz-appear'` - class to put on each element when the whole list is first time appear if it not set `classIn` is used.  
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+`classMove = 'xyz-in'` - class to put on all element that reposition;   
 
-## Learn More
+`xCssProperty = '--xyz-translate-x'` - CSS variable that set to X diff from current position to previous position    
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`yCssProperty = '--xyz-translate-y'` - CSS variable that set to Y diff from current position to previous position  
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+All rest props will go to `<xyz-context style="display:content">` element that wrap the list and no effect on the layout
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+After `onAnimationEnd`  bubbled to `<xyz-context>` the element that trigger the event cleared from : 
+    classes : `classOut` `classIn` `classAppear` `classMove`
+    style: `xCssProperty` `yCssProperty` 

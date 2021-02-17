@@ -1,8 +1,10 @@
 {
-  "name": "test-react-animation",
+  "name": "@perymimon/React-Anime",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "main": "src/Anime.js",
   "dependencies": {
+    "@animxyz/core": "^0.4.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.6.3",
@@ -13,6 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "publish:patch": "npm version patch & npm publish --access public",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

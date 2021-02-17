@@ -78,7 +78,7 @@ const calculateBoundingBoxes = (children, moved) => {
  * @returns Components
  * @constructor
  */
-export default function Anime({children, ...props}) {
+export default function AnimeManager({children, ...props}) {
     const {
         classIn = 'xyz-in', classOut = 'xyz-out', classNested = 'xyz-nested',
         classAppear = 'xyz-appear', classMove='xyz-in',

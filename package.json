@@ -2,16 +2,18 @@
   "name": "@perymimon/react-anime-manager",
   "version": "0.1.0",
   "private": false,
-  "main": "src/Anime.js",
-  "dependencies": {
-    "@animxyz/core": "^0.4.0",
+  "main": "src/Anime-Manager.js",
+  "devDependencies": {
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.6.3",
-    "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.2",
     "web-vitals": "^1.1.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "@animxyz/core": "^0.4.0"
   },
   "scripts": {
     "start": "react-scripts start",

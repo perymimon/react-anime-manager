@@ -1,3 +1,4 @@
+**inspiration from this [article](https://itnext.io/animating-list-reordering-with-react-hooks-aca5e7eeafba)**
 
 ![xyz-anime](https://animxyz.com/assets/static/animxyz-logo.b9532cc.39f3bde368e480505b70778acaa2ac74.png)
 <span style="font-size=10em;">+</span>
@@ -12,17 +13,17 @@ The solution currently manages adding and removing css classes for the revolutio
 
 No dependency at all beside `React` itself
 
-`Anime` components remember the last childes components and compare it to new list of components Then split it to 3
+`AnimeManager` components remember the last childes components and compare it to new list of components Then split it to 3
 lists , `added` `removed`, and `union` then add the corresponding class to each list:
 `classIn`, `classOut` and for the other it calculates the diff `x` `y` and put it on css variables, so it will be easy
 to use it on animation.
-Right now`<Anime>` support a list of components with `key` or one child.
+Right now`<AnimeManager>` support a list of components with `key` or one child.
 ## Examples
 
 ```jsx
 import '@animxyz/core'
 import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
-import Anime from './Anime.js';
+import AnimeManager from './Anime-Manager.js';
 
 function App() {
     const [list, setList] = useState([1, 2, 3, 4, 5])
@@ -45,13 +46,13 @@ function App() {
             <button onClick={remove}>remove from random</button>
             <h1>list</h1>
             <ol className="list-1">
-                <Anime xyz="appear-stagger-2 narrow-50%"
+                <AnimeManager xyz="appear-stagger-2 narrow-50%"
                        classIn="xyz-in"
                        classOut="xyz-out xyz-absolute">
                     {list.map((number) => (
                         <li key={'key' + number} className="item">{number}</li>
                     ))}
-                </Anime>
+                </AnimeManager>
             </ol>
 
         </div>

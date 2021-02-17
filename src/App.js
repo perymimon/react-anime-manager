@@ -1,7 +1,7 @@
 import './App.css';
 import '@animxyz/core'
 import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
-import Anime from './Anime.js';
+import AnimeManager from './Anime-Manager.js';
 // import reportWebVitals from "./reportWebVitals";
 // reportWebVitals(console.log);
 
@@ -32,32 +32,32 @@ function App() {
             <button onClick={remove.bind(0)}>remove from random</button>
             <h1>list 1</h1>
             <ol className="list-1">
-                <Anime xyz="appear-stagger-2 narrow-50% fade-100%"
-                       classIn="xyz-in"
-                       classOut="xyz-out xyz-absolute">
+                <AnimeManager xyz="appear-stagger-2 narrow-50% fade-100%"
+                              classIn="xyz-in"
+                              classOut="xyz-out xyz-absolute">
                     {list.map((number) => (
                         <li key={'key' + number} className="item">{number}</li>
                     ))}
-                </Anime>
+                </AnimeManager>
             </ol>
 
             <h1>list 2 - one element</h1>
             <button onClick={handleInout}>{inout ? 'OUT' : 'IN'}</button>
             <ol className="list-2">
-                <Anime xyz="appear-stagger-2 narrow-50%">
+                <AnimeManager xyz="appear-stagger-2 narrow-50%">
                     {inout && <li className="item">0000</li>}
-                </Anime>
+                </AnimeManager>
             </ol>
 
             <h1>list 3 - one element</h1>
             <ol className="list-3">
-                <Anime xyz="appear-stagger-2 fade-25% perspective origin-top flip-up-25%"
-                       classOut="xyz-out" classMove="my-xyz-move"
-                       yCssProperty={false}>
+                <AnimeManager xyz="appear-stagger-2 fade-25% perspective origin-top flip-up-25%"
+                              classOut="xyz-out" classMove="my-xyz-move"
+                              yCssProperty={false}>
                     {list.map((number, index) => (
                         <li key={'key' + number} className="item-3">{number}</li>
                     ))}
-                </Anime>
+                </AnimeManager>
             </ol>
         </div>
     );

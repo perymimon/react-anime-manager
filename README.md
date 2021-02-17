@@ -12,7 +12,7 @@ No dependency at all beside `React` itself
 lists , `added` `removed`, and `union` then add the corresponding class to each list:
 `classIn`, `classOut` and for the other it calculates the diff `x` `y` and put it on css variables, so it will be easy
 to use it on animation.
-
+Right now`<Anime>` support a list of components with `key` or one child.
 ## Examples
 
 ```jsx
@@ -57,6 +57,7 @@ function App() {
 export default App;
 ```
 
+
 There are a couple of property (with there default) the Component can take :
 
 `classIn = 'xyz-in'`  - class to put on each `new` element.       
@@ -71,8 +72,8 @@ There are a couple of property (with there default) the Component can take :
 
 `yCssProperty = '--xyz-translate-y'` - CSS variable that set to Y diff from current position to previous position  
 
-All rest props will go to `<xyz-context style="display:content">` element that wrap the list and no effect on the layout
 
+All rest props will go to `<xyz-context style="display:content">` element that wrap the list and no effect on the layout
 After `onAnimationEnd`  bubbled to `<xyz-context>` the element that trigger the event cleared from : 
     classes : `classOut` `classIn` `classAppear` `classMove`
     style: `xCssProperty` `yCssProperty` 

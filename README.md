@@ -1,4 +1,8 @@
-## ANIME
+
+![xyz-anime](https://animxyz.com/assets/static/animxyz-logo.b9532cc.39f3bde368e480505b70778acaa2ac74.png)
+<span style="font-size=10em;">+</span>
+![react logo](https://reactjs.org/icons/icon-96x96.png)
+## ANIME MANAGER
 
 Finally, Solved the issue with animation in react. Basically the problem of managing exit and entry of components to the
 page, List or solo, so that they can be animated.

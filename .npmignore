@@ -1,3 +1,5 @@
 .idea
+node_modules/*
+public/*
 src/*
-!src/Anime-Manager.js
+!src/Anime-Manager.jsx

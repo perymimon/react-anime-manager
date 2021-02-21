@@ -1,20 +1,9 @@
 {
   "name": "@perymimon/react-anime-manager",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": false,
-  "main": "src/Anime-Manager.js",
-  "devDependencies": {
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^12.6.3",
-    "react-dom": "^17.0.1",
-    "react-scripts": "4.0.2",
-    "web-vitals": "^1.1.0"
-  },
-  "peerDependencies": {
-    "react": "^17.0.1",
-    "@animxyz/core": "^0.4.0"
-  },
+  "main": "src/Anime-Manager.jsx",
+
   "scripts": {
     "start": "react-scripts start",
     "publish:patch": "npm version patch & npm publish --access public",
@@ -22,6 +11,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -39,5 +29,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.6.3",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.2",
+    "web-vitals": "^1.1.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "@animxyz/core": "^0.4.0"
   }
 }

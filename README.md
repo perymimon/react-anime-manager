@@ -23,7 +23,7 @@ Right now`<AnimeManager>` support a list of components with `key` or one child.
 ```jsx
 import '@animxyz/core'
 import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
-import AnimeManager from './Anime-Manager.js';
+import AnimeManager from './Anime-Manager.jsx';
 
 function App() {
     const [list, setList] = useState([1, 2, 3, 4, 5])

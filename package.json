@@ -1,6 +1,6 @@
 {
   "name": "@perymimon/react-anime-manager",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": false,
   "license": "MIT",
   "main": "src/Anime-Manager.jsx",

@@ -3,6 +3,9 @@
   "version": "0.1.3",
   "private": false,
   "main": "src/Anime-Manager.jsx",
+  "files": [
+    "src/Anime-Manager.jsx"
+  ],
   "scripts": {
     "start": "node scripts/start.js",
     "publish:patch": "npm version patch & npm publish --access public",

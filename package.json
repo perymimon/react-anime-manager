@@ -34,14 +34,6 @@
       "last 1 safari version"
     ]
   },
-  "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/changelog",
-    "@semantic-release/github",
-    "@semantic-release/npm",
-    "@semantic-release/git"
-  ],
   "peerDependencies": {
     "react": "^17.0.1",
     "@animxyz/core": "^0.4.0"

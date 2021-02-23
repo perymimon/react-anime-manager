@@ -8,6 +8,7 @@
     "src/Anime-Manager.jsx"
   ],
   "scripts": {
+    "release": "auto shipit --base-branch=master",
     "start": "node scripts/start.js",
     "publish:patch": "npm version patch & npm publish --access public",
     "build": "cross-env BABEL_ENV=production babel src -d dist",

@@ -1,0 +1,39 @@
+
+li.item{
+    width: 10em;
+    height: 2em;
+    display: grid;
+    justify-content: center;
+
+    background-image: linear-gradient(to bottom, #9eff88, #85d672);
+    margin-bottom: 2px;
+    --xyz-translate-y: -100%;
+    --xyz-ease: cubic-bezier(0.5, -1.5, 0.5, 1.5);
+}
+
+.list-3{
+    display: grid;
+    flex-direction: row;
+    grid-template-columns: repeat(4, 15em);
+}
+
+.item-3{
+    width: 10em;
+    height: 2em;
+    background-image: linear-gradient(to bottom, #9eff88, #7bba69);
+    margin-bottom: 2px;
+}
+
+.my-xyz-move{
+    animation-name: moves-edges;
+}
+
+@keyframes moves-edges {
+    50% {
+        transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+    50.1% {
+        transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+
+}

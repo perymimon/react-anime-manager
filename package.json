@@ -1,11 +1,11 @@
 {
   "name": "@perymimon/react-anime-manager",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": false,
   "license": "MIT",
-  "main": "src/Anime-Manager.jsx",
+  "main": "dist/Anime-Manager.js",
   "files": [
-    "src/Anime-Manager.jsx"
+    "dist/Anime-Manager.js"
   ],
   "scripts": {
     "release": "auto shipit --base-branch=master",
@@ -93,6 +93,7 @@
     "postcss-preset-env": "6.7.0",
     "postcss-safe-parser": "5.0.2",
     "prompts": "2.4.0",
+    "prop-types": "^15.7.2",
     "react-app-polyfill": "^2.0.0",
     "react-dev-utils": "^11.0.2",
     "react-dom": "^17.0.1",
@@ -102,6 +103,7 @@
     "sass-loader": "^10.0.5",
     "semantic-release": "^17.3.9",
     "semver": "7.3.2",
+    "storybook-addon-jsx": "^7.3.6",
     "style-loader": "1.3.0",
     "terser-webpack-plugin": "4.2.3",
     "ts-pnp": "1.2.0",

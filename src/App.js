@@ -1,5 +1,4 @@
 import './App.css';
-import '@animxyz/core'
 import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
 import AnimeManager from './Anime-Manager.jsx';
 // import reportWebVitals from "./reportWebVitals";
@@ -31,15 +30,7 @@ function App() {
             <button onClick={add.bind(0)}>add in random</button>
             <button onClick={remove.bind(0)}>remove from random</button>
             <h1>list 1</h1>
-            <ol className="list-1">
-                <AnimeManager xyz="appear-stagger-2 narrow-50% fade-100%"
-                              classIn="xyz-in"
-                              classOut="xyz-out xyz-absolute">
-                    {list.map((number) => (
-                        <li key={'key' + number} className="item">{number}</li>
-                    ))}
-                </AnimeManager>
-            </ol>
+
 
             <h1>list 2 - one element</h1>
             <button onClick={handleInout}>{inout ? 'OUT' : 'IN'}</button>

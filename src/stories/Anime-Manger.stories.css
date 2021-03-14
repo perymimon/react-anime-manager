@@ -7,10 +7,12 @@ li.item{
 
     background-image: linear-gradient(to bottom, #9eff88, #85d672);
     margin-bottom: 2px;
-    --xyz-translate-y: -100%;
-    --xyz-ease: cubic-bezier(0.5, -1.5, 0.5, 1.5);
+    /*--xyz-translate-y: -100%;*/
+    /*--xyz-ease: cubic-bezier(0.5, -1.5, 0.5, 1.5);*/
 }
-
+/*li.item.xyz-absolute{*/
+/*    z-index: 10;*/
+/*}*/
 .list-3{
     display: grid;
     flex-direction: row;

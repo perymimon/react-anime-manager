@@ -27,10 +27,14 @@ function App() {
 
     return (
         <div className="App">
-            <button onClick={add.bind(0)}>add in random</button>
-            <button onClick={remove.bind(0)}>remove from random</button>
+            <button onClick={add}>add in random</button>
+            <button onClick={remove}>remove from random</button>
             <h1>list 1</h1>
-
+            <AnimeManager {...args}>
+                {internalList.map((number) => (
+                    <li key={'key' + number} className="item">{number}</li>
+                ))}
+            </AnimeManager>
 
             <h1>list 2 - one element</h1>
             <button onClick={handleInout}>{inout ? 'OUT' : 'IN'}</button>

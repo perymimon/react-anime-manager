@@ -1,14 +1,14 @@
 //# inspiration from https://codesandbox.io/s/reorder-elements-with-slide-transition-and-react-hooks-flip-211f2?file=/src/AnimateBubbles.js
 import React, {useRef, useState, useEffect, useLayoutEffect, useMemo} from "react";
+import {func} from "prop-types";
 
-const usePrevious = (value, initialValue) => {
+const STATIC = 'static', ADDED = 'added', REMOVED = 'removed', MOVE = 'move';
 
+const usePrevious = (value, initialValue, refValue) => {
     const ref = useRef(initialValue);
-
     useEffect(() => {
         ref.current = value;
-    }, [value]);
-
+    }, [refValue ?? value]);
     return ref.current;
 };
 
@@ -18,58 +18,115 @@ function useAppear() {
     useEffect(_ => {
         flag.current = false;
         return _ => flag.current = true;
-    });
+    }, []);
 
     return flag.current;
 }
 
-function difference(array1, array2, key) {
-    let exports = [];
-    for (let pos1 = 0; pos1 < array1.length; pos1++) {
-        let item1 = array1[pos1];
-        let pos2 = array2.findIndex(item2 => item1[key] === item2[key])
-        if (pos2 === -1) {
-            exports[pos1] = item1;
-        }
-    }
-    return exports;
-}
-
+/** just use the key on two runs of the running component ( with different array reference )
+ to find which item added or removed */
 function useChangeIntersection(array, key) {
-    const prevArray = usePrevious(array, []);
+    const currentArray = [array].flat(1)
+    const prevArray = usePrevious(currentArray, []);
+
     return useMemo(_ => {
-        const inserters = difference(array, prevArray, key);
-        const removed = difference(prevArray, array, key);
+        const unionMap = new Map()
 
-        const union = [...array];
-        removed.forEach((item, i) => union.splice(i, 0, item));
+        for (let [i, item] of prevArray.entries()) {
+            unionMap.set(item[key], {
+                item, key: item[key], phase: REMOVED, from: i, to: -1
+            })
+        }
 
-        const moved = {};
-        prevArray.forEach((item1, i) => {
-            moved[item1[key]] = [i, array.findIndex(item2 => item2[key] === item1[key])]
-        })
-        return {inserters, removed, moved, union};
+        for (let [i, item] of currentArray.entries()) {
+            let k = item[key];
+            let state = unionMap.get(k);
+            let phase = state ? (i === state.from) ? STATIC : MOVE : ADDED;
+            unionMap.set(k, {
+                key: k, from: -1, ...state, item, phase, to: i,
+            })
+        }
+
+        const unionOrder = currentArray.map(item => item.key);
+        for (let [key, obj] of unionMap) {
+            if (obj.phase !== REMOVED) continue;
+            unionOrder.splice(obj.from, 0, obj.key);
+        }
+
+        return unionOrder.map(key => unionMap.get(key))
     }, [array])
 }
 
-const calculateBoundingBoxes = (children, moved) => {
-    const boxes = children.map(child => {
-        const {x, y} = child.ref.current.getBoundingClientRect();
-        return {x, y}
-    })
-    const diffs = [];
-    for (let child, i = 0; child = children[i]; i++) {
-        if (!moved[child.key]) continue;
-        const [from, to] = moved[child.key];
-        if (to === from || to === -1 || from === -1) continue;
-        diffs[i] = {
-            x: boxes[from].x - boxes[to].x,
-            y: boxes[from].y - boxes[to].y
+function useDebounceRender() {
+    const [renderRequested, forceRender] = useState(false);
+
+    function render() {
+        if (renderRequested === true) return;
+        window.requestAnimationFrame(_ => {
+            console.log('forceRender');
+            forceRender(true);
+            forceRender(false);
+        })
+    }
+
+    return render;
+}
+
+function useAnimeManager(children, key, layoutEffect) {
+    let statedChildren = useChangeIntersection(children, key);
+    const forceRender = useDebounceRender();
+
+    function doneFactory(state) {
+        const {item, phase} = state;
+        return function done() {
+            console.log('done factory');
+
+            if (phase === ADDED || phase === MOVE) {
+                state.phase = STATIC;
+                return forceRender();
+            }
+            if (phase === REMOVED) {
+                const index = statedChildren.findIndex((state) => state.key === item.key);
+                statedChildren.splice(index, 1);
+                return forceRender();
+            }
         }
     }
 
-    return diffs;
-};
+    return useMemo((_)=> statedChildren.map(function (state) {
+        state.ref = React.createRef();
+        state.done = doneFactory(state);
+        return state;
+    }),[statedChildren])
+}
+
+function useAnimeEffect(states) {
+    const boxMap = new Map();
+    const prevBoxMap = usePrevious(boxMap, null, states);
+    const forceRender = useDebounceRender();
+    states.forEach((state, i) => {
+        state.dx = state.dx ?? 0;
+        state.dy = state.dy ?? 0;
+    })
+
+    useLayoutEffect(function () {
+        console.log('useAnimeEffect');
+        states.forEach((state, i) => {
+            const {ref, key, from, to} = state;
+            let dom = state.dom = ref.current ?? null;
+            if (!dom) return;
+            const box = dom?.getBoundingClientRect() ?? null;
+            boxMap.set(key, box);
+            const prevBox = prevBoxMap?.get(key);
+            if(prevBox){
+                state.dx = prevBox.x - box.x;
+                state.dy = prevBox.y - box.y;
+            }
+        })
+        forceRender();
+
+    },[states]);
+}
 
 /**
  * ANIME
@@ -81,75 +138,38 @@ const calculateBoundingBoxes = (children, moved) => {
 export default function AnimeManager({children, ...props}) {
     const {
         classIn = 'xyz-in', classOut = 'xyz-out', classNested = 'xyz-nested',
-        classAppear = 'xyz-appear', classMove='xyz-in',
+        classAppear = 'xyz-appear', classMove = 'xyz-in',
         xCssProperty = '--xyz-translate-x', yCssProperty = '--xyz-translate-y',
         ...restProps
     } = props;
 
     const isAppear = useAppear();
-    const [_, forceRender] = useState()
-    /*
-        if children is not Array convert it to array
-        and add 'ref' so we can reference to the DOM later
-    */
-    children = useMemo(_ => {
-        children = [children].flat(1).filter(React.isValidElement);
-        return children.map(child => ({...child, ref: React.createRef(), key: child.key || 'anime-constant-key'}))
-    }, [children])
-    const {inserters, removed, union, moved} = useChangeIntersection(children, 'key')
+    /** if children is not Array convert it to array
+     and add 'ref' so we can reference to the DOM later */
 
-    const handleRemove = (child) => {
-        return function (event) {
-            let i = union.findIndex(c => child.key === c.key)
-            union.splice(i, 1);
-            // event.target.classList.remove(classIn,classOut)
-            forceRender([])
-        }
+    const childrenState = useAnimeManager(children, 'key');
+    const state2class = {
+        "added": (isAppear ? classAppear : classIn) ?? classIn,
+        "removed": classOut,
+        "move": classIn,
+        "static": ''
     }
 
-    useLayoutEffect(_ => {
-        const diffs = calculateBoundingBoxes(union, moved);
+    useAnimeEffect(childrenState)
 
-        diffs.forEach((diff, i) => {
-            let dom = union[i].ref.current;
-            dom.setAttribute('xyz', '');
-            if (xCssProperty && diff.x)
-                dom.style.setProperty(xCssProperty, `${diff.x}px`);
-            if (yCssProperty && diff.y)
-                dom.style.setProperty(yCssProperty, `${diff.y}px`);
-
-            dom.classList.add(... classMove.split(' '));
+    const childrenAnime = childrenState.map(function ({item: child, phase, dx, dy, ref, done}) {
+        let {className} = child.props;
+        return React.cloneElement(child, {
+            className: [className, state2class[phase]].join(' '),
+            xyz: phase == MOVE ? '' : undefined,
+            ref: ref,
+            style:{[yCssProperty]:`${dy}px`},
+            onAnimationEnd: done
         })
-        removed.forEach(child => {
-            let dom = child.ref.current;
-            dom.classList.add( ... classOut.split(' '))
-            dom.onanimationend = handleRemove(child);
-        })
+    })
 
-        inserters.forEach(child => {
-            let dom = child.ref.current;
-            let classes = isAppear ? (classAppear || classIn) : classIn
-            dom.classList.add(...classes.split(' '));
-        })
-
-    }, [children])
-
-    function handleAnimationEnd(event) {
-        const dom = event.target;
-        /* normalize classOut='xzy-out xyz-absolute' classIn='xyz-in'*/
-        const classes = [classOut, classIn, classNested, classAppear, classMove]
-            .join(' ').split(' ').filter(Boolean);
-        dom.classList.remove(...classes);
-        dom.removeAttribute('xyz');
-        dom.style.removeProperty(xCssProperty);
-        dom.style.removeProperty(yCssProperty);
-    }
-
-    return <xyz-context
-        {...restProps}
-        style={props.style}
-        onAnimationEnd={handleAnimationEnd}>
-        {union}
+    return <xyz-context {...restProps} style={props.style}>
+        {childrenAnime}
     </xyz-context>;
 }
 

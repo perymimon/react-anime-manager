@@ -7,6 +7,10 @@
   "files": [
     "dist/Anime-Manager.js"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perymimon/React-Anime-Manager.git"
+  },
   "scripts": {
     "release": "auto shipit --base-branch=master",
     "start": "node scripts/start.js",

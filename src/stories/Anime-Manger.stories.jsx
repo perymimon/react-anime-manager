@@ -1,4 +1,4 @@
-import AnimeManager from "../Anime-Manager";
+import {useAnimeManager, useAnimeEffect, MOVE, useAppear} from "../Anime-Manager";
 import React, {useRef, useState} from "react";
 import '@animxyz/core'
 import './Anime-Manger.stories.css'
@@ -8,9 +8,9 @@ import {jsxDecorator} from "storybook-addon-jsx";
 export default {
     title: 'Components/AnimeManger',
     decorators: [jsxDecorator],
-    component: AnimeManager,
     args: {
-        xyz: "appear-stagger-2 narrow-50% fade-100%",
+        xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
+        style:{'--xyz-appear-duration':'3s'},
         classIn: "xyz-in",
         classOut: "xyz-out xyz-absolute",
         classAppear: "xyz-appear",
@@ -20,14 +20,18 @@ export default {
     argTypes: {}
 }
 /* story: List */
-export const List = ({list, ...args}) => {
+export const List = ({list, classAppear,classIn,classOut,  ...args}) => {
     const [internalList, setList] = useState(list)
     const counter = useRef(list.length)
+    const items = useAnimeManager(internalList);
+    const isAppear = useAppear();
+    useAnimeEffect(items);
 
     function add() {
         // let pos = ~~(Math.random() * internalList.length);
         let index = document.getElementById('add-from').value;
         internalList.splice(+index, 0, ++counter.current)
+        console.log(internalList);
         setList([...internalList]);
     }
 
@@ -37,6 +41,12 @@ export const List = ({list, ...args}) => {
         let pos = Math.min(internalList.length - 1, +index);
         setList(internalList.filter((c, i) => i !== pos));
     }
+    const state2class = {
+        "added": classAppear,
+        "removed": classOut,
+        "move": classIn,
+        "static": ''
+    }
 
     return <div>
         <button onClick={add}>add in random</button>
@@ -45,12 +55,16 @@ export const List = ({list, ...args}) => {
             Remove from <input type="text" id="remove-from" defaultValue={10}/>
             Add to <input type="text" id="add-from" defaultValue={0}/>
         </div>
-        <ol className="list-1">
-            <AnimeManager {...args}>
-                {internalList.map((number) => (
-                    <li key={'key' + number} className="item">{number}</li>
+        <ol className="list-1" xyz={args.xyz} style={{'animation-duration':'3s'}}>
+                {items.map(({item: number, phase, dx, dy, ref, done}) => (
+                    <li key={'key' + number}
+                        className={["item", state2class[phase]].join(' ')}
+                        ref={ref}
+                        style={{[args.yCssProperty]: `${dy}px`}}
+                        onAnimationEnd={done}
+
+                    >{number}</li>
                 ))}
-            </AnimeManager>
         </ol>
     </div>
 }

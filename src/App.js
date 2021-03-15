@@ -1,6 +1,5 @@
 import './App.css';
 import React, {useRef, useState, useEffect, useLayoutEffect} from "react";
-import AnimeManager from './Anime-Manager.jsx';
 // import reportWebVitals from "./reportWebVitals";
 // reportWebVitals(console.log);
 

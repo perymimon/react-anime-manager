@@ -4,13 +4,14 @@ import {func} from "prop-types";
 
 export const STATIC = 'static', ADDED = 'added', REMOVED = 'removed', MOVE = 'move';
 
-function usePrevious (value, initialValue, refValue){
+function usePrevious(value, initialValue, refValue) {
     const ref = useRef(initialValue);
     useEffect(() => {
         ref.current = value;
     }, [refValue ?? value]);
     return ref.current;
 }
+
 export function useAppear() {
     const flag = useRef(true);
 
@@ -21,6 +22,7 @@ export function useAppear() {
 
     return flag.current;
 }
+
 function useDebounceRender() {
     const [renderRequested, forceRender] = useState(false);
 
@@ -38,15 +40,18 @@ function useDebounceRender() {
 
 /** just use the key on two runs of the running component ( with different array reference )
  to find which item added or removed */
-export function useChangeIntersection(array, key) {
+export function useChangeIntersection(array, options = {}) {
+    let {key, boolean, useEffect, deltaStyle} = options;
+    key = key ?? options;
     const currentArray = [array].flat(1)
-    const prevArray = usePrevious(currentArray, [],array);
+    const prevArray = usePrevious(currentArray, [], array);
+
 
     return useMemo(_ => {
         const unionMap = new Map()
 
         for (let [i, item] of prevArray.entries()) {
-            unionMap.set(item[key]?? item, {
+            unionMap.set(item[key] ?? item, {
                 item, key: item[key] ?? item, phase: REMOVED, from: i, to: -1
             })
         }
@@ -70,9 +75,15 @@ export function useChangeIntersection(array, key) {
     }, [array])
 }
 
-export function useAnimeManager(items, key, layoutEffect) {
-    let statedItems = useChangeIntersection(items, key);
+export function useAnimeManager(items, options = {}) {
+    let {key, boolean, useEffect} = options;
+    key = key ?? options/*key*/
+
+    let statedItems = useChangeIntersection(items, options);
     const forceRender = useDebounceRender();
+    if (useEffect) {
+        useAnimeEffect(statedItems)
+    }
 
     function doneFactory(item) {
         const {key, phase} = item;
@@ -89,26 +100,31 @@ export function useAnimeManager(items, key, layoutEffect) {
         }
     }
 
-    useMemo((_)=> statedItems.forEach(function (state) {
+    useMemo((_) => statedItems.forEach(function (state) {
         state.ref = React.createRef();
         state.done = doneFactory(state);
-    }),[statedItems])
+    }), [statedItems])
 
-    return statedItems;
+    if (boolean && statedItems.length === 2 && statedItems[0].item == false) {
+        statedItems.shift();
+    }
+
+    return boolean ? statedItems[0] : statedItems;
 }
 
 const originalPhase = Symbol('originalPhase');
+
 export function useAnimeEffect(states) {
     const boxMap = new Map();
     const prevBoxMap = usePrevious(boxMap, null, states);
     const forceRender = useDebounceRender();
 
-    useMemo(_=>states.forEach((state, i) => {
+    useMemo(_ => states.forEach((state, i) => {
         state.dx = state.dx ?? 0;
         state.dy = state.dy ?? 0;
         state[originalPhase] = state.phase;
-        state.phase = state.phase === MOVE? STATIC:state.phase;
-    }),[states])
+        state.phase = state.phase === MOVE ? STATIC : state.phase;
+    }), [states])
 
     useLayoutEffect(function () {
         console.log('useAnimeEffect');
@@ -120,12 +136,12 @@ export function useAnimeEffect(states) {
             const box = dom?.getBoundingClientRect() ?? null;
             boxMap.set(key, box);
             const prevBox = prevBoxMap?.get(key);
-            if(prevBox){
+            if (prevBox) {
                 state.dx = prevBox.x - box.x;
                 state.dy = prevBox.y - box.y;
             }
         })
         forceRender();
 
-    },[states]);
+    }, [states]);
 }

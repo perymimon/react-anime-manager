@@ -10,17 +10,22 @@ export default {
     decorators: [jsxDecorator],
     args: {
         xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
-        style:{'--xyz-appear-duration':'3s'},
-        classIn: "xyz-in",
-        classOut: "xyz-out xyz-absolute",
-        classAppear: "xyz-appear",
+        style: {'--xyz-appear-duration': '3s'},
         xCssProperty: "--xyz-translate-x",
         yCssProperty: "--xyz-translate-y",
     },
     argTypes: {}
 }
-/* story: List */
-export const List = ({list, classAppear,classIn,classOut,  ...args}) => {
+
+const state2class = {
+    "added": "xyz-appear",
+    "removed": "xyz-out xyz-absolute",
+    "move": "xyz-in",
+    "static": ''
+}
+
+/*story: list of Component*/
+export const ComponentList = ({list, classAppear, classIn, classOut, ...args}) => {
     const [internalList, setList] = useState(list)
     const counter = useRef(list.length)
     const items = useAnimeManager(internalList);
@@ -41,12 +46,7 @@ export const List = ({list, classAppear,classIn,classOut,  ...args}) => {
         let pos = Math.min(internalList.length - 1, +index);
         setList(internalList.filter((c, i) => i !== pos));
     }
-    const state2class = {
-        "added": classAppear,
-        "removed": classOut,
-        "move": classIn,
-        "static": ''
-    }
+
 
     return <div>
         <button onClick={add}>add in random</button>
@@ -55,62 +55,60 @@ export const List = ({list, classAppear,classIn,classOut,  ...args}) => {
             Remove from <input type="text" id="remove-from" defaultValue={10}/>
             Add to <input type="text" id="add-from" defaultValue={0}/>
         </div>
-        <ol className="list-1" xyz={args.xyz} style={{'animation-duration':'3s'}}>
-                {items.map(({item: number, phase, dx, dy, ref, done}) => (
-                    <li key={'key' + number}
-                        className={["item", state2class[phase]].join(' ')}
-                        ref={ref}
-                        style={{[args.yCssProperty]: `${dy}px`}}
-                        onAnimationEnd={done}
+        <ol className="list-1" xyz={args.xyz} style={{'animation-duration': '3s'}}>
+            {items.map(({item: number, phase, dx, dy, ref, done}) => (
+                <li key={'key' + number}
+                    className={["item", state2class[phase]].join(' ')}
+                    ref={ref}
+                    style={{[args.yCssProperty]: `${dy}px`}}
+                    onAnimationEnd={done}
 
-                    >{number}</li>
-                ))}
+                >{number}</li>
+            ))}
         </ol>
     </div>
 }
 
-List.args = {
-    list: [1],
+ComponentList.args = {
+    list: [1, 2, 3, 4, 5],
     addInPosition: 0,
     removeFromPosition: 0,
 }
-/*story: list of Component*/
-// export const ComponentList = ({list, ...args}) => {
-//     return <ol className="list-1">
-//         <AnimeManager {...args}>
-//             {list.map((number) => (
-//                 <Li ref={ref} key={'key' + number}>component {number}</Li>
-//             ))}
-//         </AnimeManager>
-//     </ol>
-//
-// }
-//
-// function Li(props) {
-//     const {children} = props;
-//     return <li className="item">
-//         {children}
-//     </li>
-// }
-//
-// List.args = {
-//     list: [1, 2, 3, 4, 5],
-// }
-//
-// /*story: OneChild*/
-// export const OneChild = ({showHide, ...args}) => {
-//
-//     return <ol className="list-2">
-//         <AnimeManager {...args}>
-//             {showHide && <li className="item">one Child in and out</li>}
-//         </AnimeManager>
-//     </ol>
-// }
-//
-// OneChild.args = {
-//     showHide: true,
-// }
-// /*story: FunctionControl*/
+
+/*story: OneChild*/
+export const OneChild = ({...args}) => {
+    const [show, setShow] = useState(true);
+    const {item: flag, phase, dx, dy, ref, done} = useAnimeManager(show, {
+        boolean: true,
+        useEffect: true,
+        deltaStyle: 'byChangedPosition' || 'byFromToLocation'
+    });
+
+    const isAppear = useAppear();
+
+    function toggle() {
+        setShow(!show)
+    }
+
+    return <div>
+        <button onClick={toggle}>{show ? 'To hide' : 'To show'}</button>
+            <ol className="list-2" xyz={args.xyz}>{
+                flag && <li
+                className={["item", state2class[phase]].join(' ')}
+                ref={ref}
+                style={{[args.yCssProperty]: `${dy}px`}}
+                onAnimationEnd={done}
+            >one Child in and out</li>
+        }</ol>
+    </div>
+
+
+}
+
+OneChild.args = {
+    showHide: true,
+}
+/*story: FunctionControl*/
 // export const FunctionControl = ({list, ...args}) => {
 //     return <ol className="list-3">
 //         <AnimeManager {...args}>

@@ -1,5 +1,5 @@
-import {useAnimeManager, useAnimeEffect, MOVE, useAppear} from "../Anime-Manager";
-import React, {useRef, useState} from "react";
+import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC} from "../Anime-Manager";
+import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import './Anime-Manger.stories.css'
 import {jsxDecorator} from "storybook-addon-jsx";
@@ -18,10 +18,10 @@ export default {
 }
 
 const state2class = {
-    "added": "xyz-appear",
-    "removed": "xyz-out xyz-absolute",
-    "move": "xyz-in",
-    "static": ''
+    [ADD]: "xyz-appear",
+    [REMOVE]: "xyz-out xyz-absolute",
+    [MOVE]: "xyz-in",
+    [STATIC]: ''
 }
 
 /*story: list of Component*/
@@ -79,7 +79,7 @@ ComponentList.args = {
 export const OneChild = ({...args}) => {
     const [show, setShow] = useState(true);
     const {item: flag, phase, dx, dy, ref, done} = useAnimeManager(show, {
-        boolean: true,
+        oneAtATime: true,
         useEffect: true,
         deltaStyle: 'byChangedPosition' || 'byFromToLocation'
     });
@@ -92,13 +92,13 @@ export const OneChild = ({...args}) => {
 
     return <div>
         <button onClick={toggle}>{show ? 'To hide' : 'To show'}</button>
-            <ol className="list-2" xyz={args.xyz}>{
-                flag && <li
+        <ol className="list-2" xyz={args.xyz}>{
+           <li
                 className={["item", state2class[phase]].join(' ')}
                 ref={ref}
                 style={{[args.yCssProperty]: `${dy}px`}}
                 onAnimationEnd={done}
-            >one Child in and out</li>
+            >one InOut value:{String(flag)}</li>
         }</ol>
     </div>
 
@@ -107,6 +107,71 @@ export const OneChild = ({...args}) => {
 
 OneChild.args = {
     showHide: true,
+}
+
+export const Counter = function ({...args}) {
+    console.log('-------------------------');
+
+    const [counter, setCounter] = useState(1)
+    const states = useAnimeManager(counter)
+    // states = [{item:0, phase:'add', from:-1, to:0, done}]
+    useEffect(_ => {
+        setTimeout(_=>setCounter(1+counter),700)
+    }, [])
+
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'add', from:-1, to:0, done}
+    // ]
+    return states.map(({item: number, key, phase, done}) => (
+        <div xyz={args.xyz} key={key} className={"item " + state2class[phase]}
+             onAnimationEnd={done}>{number}</div>
+    ))
+    // after `done()` called on item 2 it phase become `static`
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+
+    // after `done()` called on item 1, it removed
+    // states = [
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+}
+Counter.args = {
+
+}
+
+export const CounterOneChild = function ({...args}) {
+    console.log('-------------------------');
+
+    const [counter, setCounter] = useState(1)
+    const {item: number, key, phase, done} = useAnimeManager(counter,{oneAtATime:true})
+    // states = [{item:0, phase:'add', from:-1, to:0, done}]
+    useEffect(_ => {
+        setTimeout(_=>setCounter(1+counter),500)
+    }, [])
+
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'add', from:-1, to:0, done}
+    // ]
+    return <div xyz={args.xyz} key={key}
+                className={"item " + state2class[phase]}
+             onAnimationEnd={done}>{number}</div>
+    // after `done()` called on item 2 it phase become `static`
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+
+    // after `done()` called on item 1, it removed
+    // states = [
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+}
+Counter.args = {
+
 }
 /*story: FunctionControl*/
 // export const FunctionControl = ({list, ...args}) => {

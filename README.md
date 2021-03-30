@@ -1,7 +1,5 @@
 **Inspiration from this [article](https://itnext.io/animating-list-reordering-with-react-hooks-aca5e7eeafba)**
 
-![xyz-anime](https://animxyz.com/assets/static/animxyz-logo.b9532cc.39f3bde368e480505b70778acaa2ac74.png)
-<span style="font-size=10em;">+</span>
 ![react logo](https://reactjs.org/icons/icon-96x96.png)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

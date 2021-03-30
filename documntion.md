@@ -14,7 +14,8 @@ npx sb init
 npm install --save-dev semantic-release
 ```
 
-
+#generate Doc
+`npx doctoc .`
 # from story book distribute document
 
 ```bash

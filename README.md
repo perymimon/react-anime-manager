@@ -2,11 +2,23 @@
 
 ![react logo](https://reactjs.org/icons/icon-96x96.png)
 
+## REACT ANIME MANAGER
+
+
+FINALLY a solution to the annoying issue with animation in react. Basically the problem of animating exit [and entry] of components, before component leave the solution bring you extra loops to make your animation. It work on `array of objects` `array or primitve` one `object` or `primitive` that changes over time.
+And brings consist items states that help to build components to render, Or choose triggering some animation function from a library. The solution try to be un-opinionated about which library or methods are used for the actual animation as long as it has some sort of method to tell when animation complete.
+
+It writes basis only on originals react hooks, at ~140 lines in one file. No dependency other than `React`
+
+# Install
+
+`npm i @perymimon/react-anime-manager`
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents** 
+**Table of Contents**
 
-  - [REACT ANIME MANAGER](#react-anime-manager)
+- [REACT ANIME MANAGER](#react-anime-manager)
 - [Install](#install)
 - [How It Works](#how-it-works)
 - [How To Use](#how-to-use)
@@ -36,18 +48,6 @@
   - [`dx` & `dy`](#dx--dy)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## REACT ANIME MANAGER
-
-
-FINALLY a solution to the annoying issue with animation in react. Basically the problem of animating exit [and entry] of components, before component leave the solution bring you extra loops to make your animation. It work on `array of objects` `array or primitve` one `object` or `primitive` that changes over time.
-And brings consist items states that help to build components to render, Or choose triggering some animation function from a library. The solution try to be un-opinionated about which library or methods are used for the actual animation as long as it has some sort of method to tell when animation complete.
-
-It writes basis only on originals react hooks, at ~140 lines in one file. No dependency other than `React`
-
-# Install
-
-`npm i @perymimon/react-anime-manager`
 
 # How It Works
 

@@ -24,13 +24,109 @@ const state2class = {
     [STATIC]: ''
 }
 
-/*story: list of Component*/
-export const ComponentList = ({list, classAppear, classIn, classOut, ...args}) => {
+
+export const CounterMultiChildren = function ({...args}) {
+    console.log('-------------------------');
+
+    const [count, setCounter] = useState(1)
+    const states = useAnimeManager(count)
+    // states = [{item:1, phase:'add', from:-1, to:0, done}]
+    useEffect(_ => {
+        setTimeout(_ => {
+            setCounter(count + 1);
+        }, 1500)
+    }, [count])
+
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'add', from:-1, to:0, done}
+    // ]
+    return states.map(({item: number, key, phase, done}) => (
+        <div xyz={args.xyz} key={key} className={"item " + state2class[phase]}
+             onAnimationEnd={done}>{number}</div>
+    ))
+    // after `done()` called on item 2 it phase become `static`
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+
+    // after `done()` called on item 1, it removed
+    // states = [
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+}
+CounterMultiChildren.args = {}
+
+export const CounterOneChild = function ({...args}) {
+    console.log('-------------------------');
+
+    const [count, setCounter] = useState(1)
+    const {item: number, key, phase, done} = useAnimeManager(count, {oneAtATime: true})
+    // states = [{item:1, phase:'add', from:Infinity, to:0, done}]
+    useEffect(_ => {
+        setTimeout(_ => setCounter(1 + count), 1000)
+    }, [count])
+
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'add', from:-1, to:0, done}
+    // ]
+    return <div xyz={args.xyz} key={key}
+                className={"item " + state2class[phase]}
+                onAnimationEnd={done}>{number}</div>
+    // after `done()` called on item 2 it phase become `static`
+    // states = [
+    //  {item:1, phase:'remove', from:0, to:-1, done},
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+
+    // after `done()` called on item 1, it removed
+    // states = [
+    //  {item:2, phase:'static', from:-1, to:0, done}
+    // ]
+}
+CounterOneChild.args = {}
+
+/*story: OneChild*/
+export const ShowHide = ({...args}) => {
+    const [show, setShow] = useState(true);
+    const {item: flag, phase, dx, dy, ref, done} = useAnimeManager(show, {
+        oneAtATime: true,
+
+    });
+
+    const isAppear = useAppear();
+
+    function toggle() {
+        setShow(!show)
+    }
+
+    if (!flag) done()
+
+    return <div>
+        <button onClick={toggle}>{show ? 'To hide' : 'To show'}</button>
+        <ol className="list-2" xyz={args.xyz}>{
+            flag && <li
+                className={["item", state2class[phase]].join(' ')}
+                ref={ref}
+                onAnimationEnd={done}
+            >one InOut value:{String(flag)}</li>
+        }</ol>
+    </div>
+}
+
+ShowHide.args = {
+    showHide: true,
+}
+
+
+// /*story: list of Component*/
+export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
     const [internalList, setList] = useState(list)
     const counter = useRef(list.length)
-    const items = useAnimeManager(internalList);
+    const items = useAnimeManager(internalList, {useEffect: true});
     const isAppear = useAppear();
-    useAnimeEffect(items);
 
     function add() {
         // let pos = ~~(Math.random() * internalList.length);
@@ -75,104 +171,7 @@ ComponentList.args = {
     removeFromPosition: 0,
 }
 
-/*story: OneChild*/
-export const OneChild = ({...args}) => {
-    const [show, setShow] = useState(true);
-    const {item: flag, phase, dx, dy, ref, done} = useAnimeManager(show, {
-        oneAtATime: true,
-        useEffect: true,
-        deltaStyle: 'byChangedPosition' || 'byFromToLocation'
-    });
 
-    const isAppear = useAppear();
-
-    function toggle() {
-        setShow(!show)
-    }
-
-    return <div>
-        <button onClick={toggle}>{show ? 'To hide' : 'To show'}</button>
-        <ol className="list-2" xyz={args.xyz}>{
-           <li
-                className={["item", state2class[phase]].join(' ')}
-                ref={ref}
-                style={{[args.yCssProperty]: `${dy}px`}}
-                onAnimationEnd={done}
-            >one InOut value:{String(flag)}</li>
-        }</ol>
-    </div>
-
-
-}
-
-OneChild.args = {
-    showHide: true,
-}
-
-export const Counter = function ({...args}) {
-    console.log('-------------------------');
-
-    const [counter, setCounter] = useState(1)
-    const states = useAnimeManager(counter)
-    // states = [{item:0, phase:'add', from:-1, to:0, done}]
-    useEffect(_ => {
-        setTimeout(_=>setCounter(1+counter),700)
-    }, [])
-
-    // states = [
-    //  {item:1, phase:'remove', from:0, to:-1, done},
-    //  {item:2, phase:'add', from:-1, to:0, done}
-    // ]
-    return states.map(({item: number, key, phase, done}) => (
-        <div xyz={args.xyz} key={key} className={"item " + state2class[phase]}
-             onAnimationEnd={done}>{number}</div>
-    ))
-    // after `done()` called on item 2 it phase become `static`
-    // states = [
-    //  {item:1, phase:'remove', from:0, to:-1, done},
-    //  {item:2, phase:'static', from:-1, to:0, done}
-    // ]
-
-    // after `done()` called on item 1, it removed
-    // states = [
-    //  {item:2, phase:'static', from:-1, to:0, done}
-    // ]
-}
-Counter.args = {
-
-}
-
-export const CounterOneChild = function ({...args}) {
-    console.log('-------------------------');
-
-    const [counter, setCounter] = useState(1)
-    const {item: number, key, phase, done} = useAnimeManager(counter,{oneAtATime:true})
-    // states = [{item:0, phase:'add', from:-1, to:0, done}]
-    useEffect(_ => {
-        setTimeout(_=>setCounter(1+counter),500)
-    }, [])
-
-    // states = [
-    //  {item:1, phase:'remove', from:0, to:-1, done},
-    //  {item:2, phase:'add', from:-1, to:0, done}
-    // ]
-    return <div xyz={args.xyz} key={key}
-                className={"item " + state2class[phase]}
-             onAnimationEnd={done}>{number}</div>
-    // after `done()` called on item 2 it phase become `static`
-    // states = [
-    //  {item:1, phase:'remove', from:0, to:-1, done},
-    //  {item:2, phase:'static', from:-1, to:0, done}
-    // ]
-
-    // after `done()` called on item 1, it removed
-    // states = [
-    //  {item:2, phase:'static', from:-1, to:0, done}
-    // ]
-}
-Counter.args = {
-
-}
 /*story: FunctionControl*/
 // export const FunctionControl = ({list, ...args}) => {
 //     return <ol className="list-3">

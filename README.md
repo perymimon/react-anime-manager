@@ -4,7 +4,7 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents** 
 
   - [REACT ANIME MANAGER](#react-anime-manager)
 - [Install](#install)
@@ -13,19 +13,27 @@
   - [simple counter](#simple-counter)
   - [Hidden Element](#hidden-element)
   - [List of items](#list-of-items)
-- [Hooks](#hooks)
+- [Hooks API](#hooks-api)
   - [STATIC,ADD,REMOVE,MOVE](#staticaddremovemove)
   - [useChangeIntersection](#usechangeintersection)
   - [useAnimeEffect](#useanimeeffect)
   - [useAnimeManager](#useanimemanager)
   - [useAppear](#useappear)
 - [Hook Options Arguments](#hook-options-arguments)
-  - [tracking](#tracking)
-  - [key](#key)
-  - [oneAtATime](#oneatatime)
-  - [useEffect](#useeffect)
-  - [calculateDistanceMethod](#calculatedistancemethod)
-- [`State` Properties](#state-properties)
+  - [`tracking`](#tracking)
+  - [`key`](#key)
+  - [`oneAtATime`](#oneatatime)
+  - [`useEffect`](#useeffect)
+  - [`deltaStyle`](#deltastyle)
+- [Item State Properties](#item-state-properties)
+  - [`item`](#item)
+  - [`key`](#key-1)
+  - [`phase`](#phase)
+  - [`from`](#from)
+  - [`to`](#to)
+  - [`ref`](#ref)
+  - [`dom`](#dom)
+  - [`dx` & `dy`](#dx--dy)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -217,7 +225,7 @@ const states = useChangeIntersection(tracking, {key: undefined})
 import {useAnimeEffect} from '@perymimon/react-anime-manager'
 
 [{...state, ref, dom, dx, dy}] = useAnimeEffect(states, {
-    calculateDistanceMethod: 'bySelfLocationChange'
+    deltaStyle: 'bySelfLocationChange'
 })
 ```
 
@@ -264,11 +272,11 @@ A Boolean indicating that component first time render. you can use it to do nice
 
 # Hook Options Arguments
 
-## tracking
+## `tracking`
 A primitive , like `true/false` `0/1/2/3` `"foo"/"bar"`, `object` or `Array of primitive` or `array of objects` to track the change after.  
 If it `arrays of objects` the second argument must provide the key name on each object that can used to identify the object .
 
-## key
+## `key`
 A case-sensitive string representing the object's key name that used to identify items on the `tracking` argument. 
 That value charged exclusively to tracking the item state: `ADD, MOVE, REMOVE, STATIC`.
 
@@ -277,22 +285,21 @@ The value of each primitive used as an identify key.
 
 It can be used in option object if you want to mark more options.
 
-## oneAtATime
+## `oneAtATime`
 by default `AnimeManger` return array of item's state but for some cases it makes more sense to return just the first state and move to next one just after `done` called on REMOVE phase of the that state.
 
-## useEffect
+## `useEffect`
 mark `useAnimeManger` to use internally `useAnimeEffect`
 
-## deltaStyle
-pasted to `useAnimeEffect` hook. it used to decide how to calculate `dx` and `dy`.
+## `deltaStyle`
+string value that pasted to `useAnimeEffect` hook. it used to decide how to calculate `dx` and `dy`.
 
-`byChangedPosition` : by the comparing the changes position of the same dom's item on each update.   
+There are two values options: 
+`byChangedPosition`: by the comparing the position of the same dom's item on each `tracking` update.   
 
-`byRelativeLocation` : or by comparing the distance between dom's items, each update, using `from` and `to` of the item. the position of dom's item in position `from` compare to position of dom's item in position `to`. 
+`byRelativeLocation`: by calculating the distance between `from` and `to` for each item in the same list of items. 
 
-`byLocalToTo` :  
-
-# `State` Properties
+# Item State Properties
 
 ## `item`  
 Can be `primitive` or `object`,  Is the tracked item `state` reference to. 
@@ -320,7 +327,7 @@ Instance of `REACT.createRef`. You should attach it to generated component so `A
 Dom reference. should be the real root dom element of the component. probably equal to `ref.current`
 
 ## `dx` & `dy`
-A Number, distance in `px` the dom element moved on an x-axis and y-axis. `AnimeManger` used  `calculateDistanceMethod` to decide moved relative to what. what calulation depend on ``
+A Number, distance in `px` the dom element moved on an x-axis and y-axis. `AnimeManger` used  `deltaStyle` to decide moved relative to what. what calulation depend on ``
 
 
 [comment]: <> (```jsx)

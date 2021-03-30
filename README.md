@@ -3,12 +3,11 @@
 ![react logo](https://reactjs.org/icons/icon-96x96.png)
 
 ## REACT ANIME MANAGER
+Finally, Solved the issue with animation in React. Basically the problem of managing exit and entry of components to the page, List or solo, so that they can be animated.
 
+The solution writes basis on hooks-only,  ~140 lines in one file. No dependency other than `React`, so you can fork it out expand it and share it back.
 
-FINALLY a solution to the annoying issue with animation in react. Basically the problem of animating exit [and entry] of components, before component leave the solution bring you extra loops to make your animation. It work on `array of objects` `array or primitve` one `object` or `primitive` that changes over time.
-And brings consist items states that help to build components to render, Or choose triggering some animation function from a library. The solution try to be un-opinionated about which library or methods are used for the actual animation as long as it has some sort of method to tell when animation complete.
-
-It writes basis only on originals react hooks, at ~140 lines in one file. No dependency other than `React`
+In v2.0 it works now on `array of objects` `array or primitive` one `object` or `primitive` and brings consist items states that help you return components to render ( or choose to trigger animation from a library). It tries to be un-opinionated about which methods are actual used for the animation as long as it has some sort of way to tell when animation complete.
 
 # Install
 
@@ -18,34 +17,19 @@ It writes basis only on originals react hooks, at ~140 lines in one file. No dep
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [REACT ANIME MANAGER](#react-anime-manager)
-- [Install](#install)
 - [How It Works](#how-it-works)
 - [How To Use](#how-to-use)
   - [simple counter](#simple-counter)
   - [Hidden Element](#hidden-element)
   - [List of items](#list-of-items)
 - [Hooks API](#hooks-api)
-  - [STATIC,ADD,REMOVE,MOVE](#staticaddremovemove)
+  - [Helpers const STATIC,ADD,REMOVE,MOVE](#helpers-const-staticaddremovemove)
   - [useChangeIntersection](#usechangeintersection)
   - [useAnimeEffect](#useanimeeffect)
   - [useAnimeManager](#useanimemanager)
   - [useAppear](#useappear)
 - [Hook Options Arguments](#hook-options-arguments)
-  - [`tracking`](#tracking)
-  - [`key`](#key)
-  - [`oneAtATime`](#oneatatime)
-  - [`useEffect`](#useeffect)
-  - [`deltaStyle`](#deltastyle)
 - [Item State Properties](#item-state-properties)
-  - [`item`](#item)
-  - [`key`](#key-1)
-  - [`phase`](#phase)
-  - [`from`](#from)
-  - [`to`](#to)
-  - [`ref`](#ref)
-  - [`dom`](#dom)
-  - [`dx` & `dy`](#dx--dy)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -63,7 +47,7 @@ Each Item's `states object` come with `done()` callback that should call when an
 
 Is important to note  that `AnimeManger` by default protect from adding item and then remove it before animation done. Means before calling `done` to  `ADD` `MOVE` and `REMOVE` phases. when it happens `AnimeManger` continue to send the current phase, waiting for `done` , then changed to `STATIC` made force render and _just then_ immediately updated the state to next state and made another render. this way you can sure that your animation will complete and clean after before it move to next phase and animation that come with it.
 
-# How To Use
+# Examples
 
 ## simple counter
 
@@ -189,9 +173,9 @@ function ComponentList({...props}) {
 There is a couple of hooks that exposed by the module. each hook enriches the state's item with its things and together
 they build `useAnimeManager`.
 
-## STATIC,ADD,REMOVE,MOVE
+## Helpers const STATIC,ADD,REMOVE,MOVE
 
-Module provide some constant for `phase` . it not mandatory to use them, but it is helpful 
+Some constants represent the values `phase` can be. It not mandatory to use them, but it helpful 
 
 ```jsx
 import {STATIC, ADD, REMOVE, MOVE} from '@perymimon/react-anime-manager'

@@ -38,3 +38,6 @@ auto release
 "release": "auto shipit --base-branch=master",
 
 ```
+
+### note
+fonts for a console: Consolas, "Liberation Mono", Courier, monospace

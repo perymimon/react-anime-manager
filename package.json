@@ -1,6 +1,6 @@
 {
   "name": "@perymimon/react-anime-manager",
-  "version": "0.2.0",
+  "version": "1.0.3",
   "private": false,
   "license": "MIT",
   "main": "dist/Anime-Manager.js",
@@ -11,6 +11,7 @@
     "type": "git",
     "url": "https://github.com/perymimon/React-Anime-Manager.git"
   },
+  "homepage": "https://perymimon.github.io/React-Anime-Manager",
   "scripts": {
     "release": "auto shipit --base-branch=master",
     "start": "node scripts/start.js",
@@ -19,7 +20,9 @@
     "xbuild": "node scripts/build.js",
     "test": "node scripts/test.js",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "storybook-to-ghpages",
+    "docs": "npx doctoc ."
   },
   "eslintConfig": {
     "extends": [
@@ -51,10 +54,11 @@
     "@babel/cli": "^7.12.17",
     "@babel/core": "7.12.3",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
-    "@storybook/addon-actions": "^6.1.18",
-    "@storybook/addon-essentials": "^6.1.18",
-    "@storybook/addon-links": "^6.1.18",
-    "@storybook/react": "^6.1.18",
+    "@storybook/addon-actions": "^6.2.1",
+    "@storybook/addon-essentials": "^6.2.1",
+    "@storybook/addon-links": "^6.2.1",
+    "@storybook/react": "^6.2.1",
+    "@storybook/storybook-deployer": "^2.8.7",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
@@ -111,7 +115,7 @@
     "sass-loader": "^10.0.5",
     "semantic-release": "^17.3.9",
     "semver": "7.3.2",
-    "storybook-addon-jsx": "^7.3.6",
+    "storybook-addon-jsx": "^7.3.7",
     "style-loader": "1.3.0",
     "terser-webpack-plugin": "4.2.3",
     "ts-pnp": "1.2.0",

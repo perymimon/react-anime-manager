@@ -167,44 +167,67 @@ export function useChangeIntersection(tracking, options = {}) {
     }, [tracking])
 }
 
-export function useAnimeEffect(states, options = {}) {
-    const {deltaStyle} = options
-    const {current: boxMap} = useRef(new Map());
-    const forceRender = useDebounceRender();
 
-    function timeBoxes(dom, key) {
-        const box = dom.getBoundingClientRect() ?? null;
+function madeBoxesGetter(by, states, boxMap) {
+    if (by == 'byLocation') return createLocationBoxes(states);
+    if (by == 'byPosition') return timeBoxes;
+    return WARNS.bind('noDeltaStyle', by);
+
+    function timeBoxes(state) {
+        const {key, dom} = state;
+        const box = dom?.getBoundingClientRect() ?? null;
         const prevBox = boxMap.get(key);
         boxMap.set(key, box);
         return {box, prevBox}
     }
+
+    function createLocationBoxes(states) {
+        const list = [];
+        for (const state of states) list[state.to] = state;
+        delete list[Infinity]
+
+        return function locationBoxes(state) {
+            const {from, to} = state;
+            const box = list[to].dom?.getBoundingClientRect();
+            const prevBox = list[from].dom?.getBoundingClientRect()
+            return {box, prevBox}
+        }
+    }
+
+}
+
+export function useAnimeEffect(states, options = {}) {
+    const {deltaStyle = 'byPosition'} = options
+    const {current: boxMap} = useRef(new Map());
+    const forceRender = useDebounceRender();
+    const getBoxes = madeBoxesGetter(deltaStyle, states, boxMap)
 
     useMemo((_) => states.forEach((state, i) => {
         state.ref = React.createRef();
         state.dx = state.dx ?? 0;
         state.dy = state.dy ?? 0;
         state.nextPhases.push(state.phase);
-        state.phase = state.prevPhase;
+        if (state.phase == MOVE) state.phase = state.prevPhase;
         const done = state.done;
         state.done = function () {
             done();
-            if (state.phase == STATIC)
-                boxMap.delete(state.key);
+            boxMap.set(state.key, state?.dom.getBoundingClientRect());
         }
     }), [states])
 
     useLayoutEffect(function () {
-        // console.log('useAnimeEffect');
-        states.forEach((state, i) => {
-            const {ref: {current: dom = null}, key, from, to} = state;
+
+        for (const state of states) {
+            const {key, from, to, ref: {current: dom = null}} = state;
             state.phase = state.nextPhases.pop();
-            if (!dom) return;
-            const {box, prevBox} = timeBoxes(dom, key)
-            if (prevBox) {
+            state.dom = dom;
+            const {box, prevBox} = getBoxes(state)
+            if (prevBox && box) {
                 state.dx = prevBox.x - box.x;
                 state.dy = prevBox.y - box.y;
             }
-        })
+        }
+
         forceRender();
 
     }, [states]);
@@ -213,7 +236,9 @@ export function useAnimeEffect(states, options = {}) {
 function WARNS(test, code, arg0) {
     const codes = {
         'overflow':
-            `above ${arg0} items waiting to draw. consider faster your animation`
+            `above ${arg0} items waiting to draw. consider faster your animation`,
+        'deltaStyle':
+            `delta style can be: "byPosition" or "byLocation", current:${arg0}`
     }
 
     test && console.warn(codes[code])

@@ -1,6 +1,6 @@
 **Inspiration from this [article](https://itnext.io/animating-list-reordering-with-react-hooks-aca5e7eeafba)**
 
-If you liked It, and would like to express Your appreciation added a star ⭐ to github project will give me back. Thanks.
+If you liked It added a star ⭐ to github project will give me back. Thanks.
 
 ## REACT ANIME MANAGER
 

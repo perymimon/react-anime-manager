@@ -16,8 +16,8 @@ npm install --save-dev semantic-release
 
 #generate Doc
 `npx doctoc .`
-# from story book distribute document
 
+# from story book distribute document
 ```bash
 #`package.json/scripts` change build process to export to `dist` directory by babel
 "build": "cross-env BABEL_ENV=production babel src -d dist",

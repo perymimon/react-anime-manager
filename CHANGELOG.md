@@ -2,6 +2,19 @@
 
 #### ⚠️ Pushed to `master`
 
+- git ignore (pery.mimon@gmail.com)
+- update some doc file (pery.mimon@gmail.com)
+
+#### Authors: 1
+
+- perym (pery.mimon@gmail.com)
+
+---
+
+# v1.0.4 (Tue Apr 06 2021)
+
+#### ⚠️ Pushed to `master`
+
 - update some doc file (pery.mimon@gmail.com)
 
 #### Authors: 1

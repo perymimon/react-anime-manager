@@ -172,7 +172,8 @@ function ShowHide() {
 
 ## List of items
 
-Here example that show much of `useReactAnime` power for `array` or items. By pipping all items through internal
+Here example that show much of `useReactAnime` power for `array` or items.
+By pipping all items through internal
 hook: `useAnimeEffect`,  `useReactAnime` enriches the state of each item with:
 
 * `dom` - Actual dom's root .

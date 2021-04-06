@@ -1,21 +1,11 @@
 # v1.0.4 (Tue Apr 06 2021)
 
-#### ⚠️ Pushed to `master`
-
-- git ignore (pery.mimon@gmail.com)
-- update some doc file (pery.mimon@gmail.com)
-
-#### Authors: 1
-
-- perym (pery.mimon@gmail.com)
-
----
-
-# v1.0.4 (Tue Apr 06 2021)
-
-#### ⚠️ Pushed to `master`
-
-- update some doc file (pery.mimon@gmail.com)
+- move to generic hook design (pery.mimon@gmail.com)
+- finish 4 test in storybook
+- add source code panel to storybook via addon `storysource`  
+- update storybook to 6.2.3  
+- publish storybook as gh-page as code example
+- write full doc on README.md file
 
 #### Authors: 1
 

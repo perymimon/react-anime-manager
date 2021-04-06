@@ -1,3 +1,15 @@
+# v1.0.4 (Tue Apr 06 2021)
+
+#### ⚠️ Pushed to `master`
+
+- update some doc file (pery.mimon@gmail.com)
+
+#### Authors: 1
+
+- perym (pery.mimon@gmail.com)
+
+---
+
 # v0.1.4 (Mon Feb 22 2021)
 
 - add `auto` for semantic release

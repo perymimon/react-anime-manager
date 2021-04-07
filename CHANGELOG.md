@@ -1,3 +1,21 @@
+# v1.0.5 (Wed Apr 07 2021)
+
+#### 🐛 Bug Fix
+
+- fix dependancy issue [#1](https://github.com/perymimon/React-Anime-Manager/pull/1) ([@MaxDori](https://github.com/MaxDori))
+
+#### ⚠️ Pushed to `master`
+
+- update README.md ([@MaxDori](https://github.com/MaxDori))
+- update environment files ([@perymimon](https://github.com/perymimon))
+
+#### Authors: 2
+
+- Maxim Stepanov ([@MaxDori](https://github.com/MaxDori))
+- pery mimon ([@perymimon](https://github.com/perymimon))
+
+---
+
 # v1.0.4 (Tue Apr 06 2021)
 
 - move to generic hook design (pery.mimon@gmail.com)

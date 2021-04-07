@@ -16,6 +16,7 @@
     "release": "auto shipit --base-branch=master",
     "start": "node scripts/start.js",
     "publish:patch": "npm version patch & npm publish --access public",
+    "prepublishOnly": "npm run build",
     "build": "cross-env BABEL_ENV=production babel src -d dist",
     "xbuild": "node scripts/build.js",
     "test": "node scripts/test.js",
@@ -46,6 +47,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
+    "react": "^17.0.1",
     "@animxyz/core": "^0.4.0",
     "@babel/cli": "^7.12.17",
     "@babel/core": "7.12.3",

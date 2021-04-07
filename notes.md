@@ -43,8 +43,11 @@ auto release
 fonts for a console: Consolas, "Liberation Mono", Courier, monospace
 
 ### NPM
-`npm unpublish @perymimon/react-anime-manager@1.0.1`
-`npm prefix -g`
+-`npm unpublish @perymimon/react-anime-manager@1.0.1`
+- `npm prefix -g`
+- script:prepublishOnly
+- script: prepare
+
 
 ### release step
 - `npm run docs`: to build the toc on readme.md

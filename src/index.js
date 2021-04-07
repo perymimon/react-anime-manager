@@ -1,2 +1,1 @@
-import AnimeManager from './Anime-Manager'
-export default AnimeManager;
+export * as AnimeManager from './Anime-Manager'

@@ -39,5 +39,16 @@ auto release
 
 ```
 
-### note
+### tips - fonts
 fonts for a console: Consolas, "Liberation Mono", Courier, monospace
+
+### NPM
+`npm unpublish @perymimon/react-anime-manager@1.0.1`
+`npm prefix -g`
+
+### release step
+- `npm run docs`: to build the toc on readme.md
+- `npm run release`: Github to build changelog.md
+- build: rebuild before npm publish
+- deploy story book: npm run deploy-storybook
+- 

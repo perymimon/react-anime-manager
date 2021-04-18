@@ -1,9 +1,18 @@
+@import url('https://fonts.googleapis.com/css?family=Indie+Flower');
+
 .item{
+    font-family: 'Indie Flower', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+
+    font-weight: bold;
+    border-radius: 0.5em;
+
     width: 10em;
     height: 2em;
     display: grid;
     justify-content: center;
-
+    align-content: center;
     background-image: linear-gradient(to bottom, #9eff88, #85d672);
     margin-bottom: 2px;
     /*--xyz-translate-y: -100%;*/

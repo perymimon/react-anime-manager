@@ -236,7 +236,7 @@ export function useAnimeEffect(states, options = {}) {
 function WARNS(test, code, arg0) {
     const codes = {
         'overflow':
-            `above ${arg0} items waiting to draw. consider faster your animation`,
+            `above then ${arg0} items waiting to draw. consider faster your animation`,
         'deltaStyle':
             `delta style can be: "byPosition" or "byLocation", current:${arg0}`
     }

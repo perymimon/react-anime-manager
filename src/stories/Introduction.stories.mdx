@@ -1,0 +1,236 @@
+import {
+    Meta, Preview, Story, Canvas, ArgsTable, Source, ColorPalette,
+    ColorItem
+} from '@storybook/addon-docs/blocks';
+
+import './story-style.css';
+import 'prismjs/themes/prism-okaidia.css';
+
+export var parameters = {
+    previewTabs: {
+        canvas: {hidden: true},
+    },
+};
+
+<Meta title="Overview/React-Anime-Manger" parameters={parameters}/>
+
+[![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](link to site)
+
+**Inspiration from this [article](https://itnext.io/animating-list-reordering-with-react-hooks-aca5e7eeafba)**
+
+# Welcome to REACT ANIME MANAGER
+This project aim help developer in react manging Exiting and Entering components to the view with animation.
+
+The current solution is hook approaches only, No dependency other than React.
+So at ~140 lines of code in one file it should be pretty easy to fork it out, expand and share it back.
+
+The solution try to be un-opinionated about which methods are actually used for the animation as long as it has
+some sort of way to tell when animation complete.
+
+
+# Features
+* ☔️Simple to use and understand
+* ⚛️100% React
+* 🚀 Blazing fast builds and performance.
+* 🚚 Data Agnostic.
+* 🥇 React-centric developer experience.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+- [Install & use](#)
+- [How It Works](#how-it-works)
+- [Examples](#examples)
+ - [simple counter](#simple-counter)
+ - [Hidden Element](#hidden-element)
+ - [List of items](#list-of-items)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# How It Works
+`react-anime-manager` module expose several hooks that can use separate but design work together through`useAnimeManager` hook.
+
+The hook `useAnimeManager` design to place between the data that create the JSX and the JSX result.
+It got the tracking data in one side and provide buffer array that contain the same date + removed data from the past + essential info that aim to help
+how create the next JSX;
+
+The info provide for each datum have among other things: `phase`, `dx`, `dy`, `done()`, `to`,`from`
+
+`phase` has 4 values: `ADD|MOVE|REMOVE|STATIC`. `ADD|MOVE|REMOVE` intend to give a clue that some animation should be add,
+and `STATIC` help to clean after or create clean JSX.
+
+`done()` method should call after animation end, so the hook can move `phase` to the next value, usual `STATIC`.
+Or if phase is `REMOVE` remove datum completely from is internal memory and from next providing array.
+
+Note `useAnimeManger` by default try to protect `phase` from change faster than the animation It does that
+by blocking next changes to  `phase` if `done()` not called on the previous one.
+
+e.g. If some datum added but removed quickly `phase` still has `ADD` value.
+After `done()` called `phase` will change to `STATIC` and in the next animation frame it change to the current `phase` `REMOVE`
+and aligned with the tracking data. Calling again to `done()` will remove the datum from `stateItems` and the component rerender on the next animation frame.
+
+
+# Install & Use
+
+Add package to your project
+
+`npm i @perymimon/react-anime-manager`
+
+Then import it as hook into your component
+
+```jsx
+import  {useAnimeManager} from `@perymimon/react-anime-manager`;
+
+export function Users(users){
+
+ const stateItems = useAnimeManager(users, 'id')
+ //                useAnimeManager(tracking, [key | option])
+ return stateItems.map( ({item:user, phase})=> <User {...user} className={phase}/>)
+
+}
+
+```
+
+# Examples
+
+## simple counter
+
+Let's create animation counter.
+
+```js codesandbox=animeManager
+import {useAnimeManager} from '@perymimon/react-anime-manager'
+
+export default function Counter({state2class, args}) {
+    const [count, setCounter] = useState(1)
+    const stateItems = useAnimeManager(count)
+
+    useEffect(_ => {
+        setTimeout(_ => {
+            setCounter(count + 1);
+        }, 2000)
+    }, [count])
+
+    return stateItems.map(({item: number, key, phase, done}) => (
+        <div key={key} xyz={args.xyz} className={"item " + state2class[phase]}
+             onAnimationEnd={done}>{number}</div>
+    ))
+
+}
+```
+
+<Story id="examples--counter-demo-1"/>
+
+Note how `stateItems` from `useAnimeManager` used to create the returns JSX.
+
+In this case `tracking` is just a simple primitive number, So the number also used as a key for each `stateItem`.
+
+**What happen: In the two recursive step **
+
+1. First `stateItems = [{item: 1, phase: ADD, from: Infinity, to: 0, done}]`
+2. when `onAnimationEnd` fired `done()` called so `stateItems = [{item: 1, phase: STATIC, from: 0, to: 0, done}]`
+3. When `setTimeout` called `count=2` replace `count=1` so
+
+```js
+stateItems = [
+    {item: 1, phase: STATIC, from: 0, to: 0, done},
+    {item: 2, phase: ADD, from: Infinity, to: 0, done}
+]
+```
+
+4. After `item:1.done()` called this item removed from the list.
+and after `item:2.done()` called is phase move from `ADD` to `STATIC`
+
+```js
+stateItems = [{item: 2, phase: 'static', from: Infinity, to: 0, done}]
+```
+5. Setra and Setra
+
+## Hidden Element
+
+Also `useAnimeManager` can use to animate a boolean flag .
+
+Usual because `true` and `false` considers as a different items each with its own state `useAnimeManager` return `array.length == 2` one item for tracking `false` and other item for tracking `true`.
+But because `{oneAtATime:true}` option add to `useAnimeManager` it return just the first state's item each time and hold  other changes until`done` called on `remove` phase.
+
+This approch save from dealing with `array.map` when It is not necessary.
+
+```jsx codesandbox=animeManager
+import {useAnimeManager} from '@perymimon/react-anime-manager'
+
+export default function ShowHide({state2class, args}) {
+    const [show, setShow] = useState(true);
+    const {item: flag, phase, done} = useAnimeManager(show, {oneAtATime: true});
+
+    function toggle() {
+        setShow(!show)
+    }
+
+    if (!flag) done() // see note
+
+    return <div xyz={args.xyz}>
+        <button style={{float:"left"}} onClick={toggle}>{show ? 'To hide' : 'To show'}</button>
+        {
+            flag && <div
+                className={["item", state2class[phase]].join(' ')}
+                onAnimationEnd={done}
+            >value:{String(flag)}</div>
+        }
+    </div>
+
+}
+```
+Note: because there is no element when `flag == false`. `done` must called expliclty to
+guide `useAnimeManager` continue with the states flow and show the `true` value when it arrives.
+
+
+## List of items
+
+Here example that show much of `useReactAnime` power for `array` or items.
+
+By pipping all items through `useAnimeEffect` internal hook
+`useAnimeManager` bring a `ref` key that should attach to result JSX in return it enriches the state of each item with:
+
+* `dom` - Actual dom's root .
+* `dx` & `dy` - Distance each dom's element moves relative to his previous update
+
+Of course `ref` key needed to follow React explains about [ref](https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper)
+
+
+
+```jsx codesandbox=animeManager
+import {useAnimeManager, STATIC, ADD, REMOVE, MOVE} from '@perymimon/react-anime-manager'
+
+export default function ComponentList({state2class, args}) {
+    const [internalList, setList] = useState([1, 2, 3, 4, 5])
+    const counter = useRef(internalList.length)
+    const items = useAnimeManager(internalList, {useEffect: true});
+
+    function add() {
+        let pos = ~~(Math.random() * internalList.length);
+        internalList.splice(pos, 0, ++counter.current)
+        setList([...internalList]);
+    }
+
+    function remove() {
+        let pos = ~~(Math.random() * internalList.length);
+        setList(internalList.filter((c, i) => i !== pos));
+    }
+
+    return <div xyz={args.xyz}>
+        <button onClick={add}>add in random</button>
+        <button onClick={remove}>remove from random</button>
+        <ol className="list">
+            {items.map(({item: number, phase, dx, dy, ref, done}) => (
+                <li key={'key' + number}
+                    className={["item", state2class[phase]].join(' ')}
+                    ref={ref}
+                    style={{'--xyz-translate-y': `${dy}px`}}
+                    onAnimationEnd={done}
+                >{number}</li>
+            ))}
+        </ol>
+    </div>
+}
+```
+
+next

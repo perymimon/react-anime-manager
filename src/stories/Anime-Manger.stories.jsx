@@ -2,17 +2,6 @@ import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC} f
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import './Anime-Manger.stories.css'
-import {jsxDecorator} from "storybook-addon-jsx";
-
-
-export default {
-    title: 'Components/AnimeManger',
-    decorators: [jsxDecorator],
-    args: {
-        xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
-    },
-    argTypes: {}
-}
 
 const state2class = {
     [ADD]: "xyz-appear",
@@ -21,8 +10,18 @@ const state2class = {
     [STATIC]: ''
 }
 
+export default {
+    title:"Examples/AnimeManager",
+    id:"Examples",
+    args: {
+        xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
+    },
+    argTypes: {
+        xyz: String,
+    }
+}
 
-export const CounterMultiChildren = function ({...args}) {
+export const CounterDemo1 = function ({...args}) {
     const [count, setCounter] = useState(1)
     const states = useAnimeManager(count)
 
@@ -36,39 +35,26 @@ export const CounterMultiChildren = function ({...args}) {
         <div xyz={args.xyz} key={key} className={"item " + state2class[phase]}
              onAnimationEnd={done}>{number}</div>
     ))
-    /**
-        **What happen:**
-        1. First
-            states = [{item: 1, phase: 'add', from: Infinity, to: 0, done}]
-        2. After `done()` called, when `onAnimationEnd` fired
-            states = [{item: 1, phase: 'static', from: 0, to: 0, done}]
-        3. Then, When `setTimeout` called, `2` replace `1` so
-            states = [
-                {item: 1, phase: 'remove', from: 0, to: 0, done},
-                {item: 2, phase: 'add', from: Infinity, to: 0, done}
-            ]
-        4. Then, After `done()` called on `item:1` it removed from `stateItems` list.
-           and after `done()` called on `item:2` it phase move from `add` to `static`
-            states = [{item: 2, phase: 'static', from: Infinity, to: 0, done}]
-    **/
-
 }
-CounterMultiChildren.args = {}
+CounterDemo1.args = {}
+CounterDemo1.id ="counter-1"
 
-export const CounterOneChild = function ({...args}) {
+export const CounterDemo2 = function ({...args}) {
     const [count, setCounter] = useState(1)
     const {item: number, key, phase, done} = useAnimeManager(count, {oneAtATime: true})
-
+    const state2class2 = {...state2class, [REMOVE]:'xyz-out'}
     useEffect(_ => {
         setTimeout(_ => setCounter(1 + count), 1000)
     }, [count])
 
     return <div xyz={args.xyz} key={key}
-                className={"item " + state2class[phase]}
+                className={"item " + state2class2[phase]}
                 onAnimationEnd={done}>{number}</div>
 
 }
-CounterOneChild.args = {}
+CounterDemo2.args = {}
+CounterDemo2.id = "counter-2"
+
 
 /*story: OneChild*/
 export const ShowHide = ({...args}) => {
@@ -103,7 +89,13 @@ export const ShowHide = ({...args}) => {
 ShowHide.args = {
     showHide: true,
 }
-
+ShowHide.parameters =  {
+    docs: {
+        source: {
+            type: 'code'
+        }
+    }
+}
 
 export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
     const [internalList, setList] = useState(list)
@@ -124,13 +116,13 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
 
 
     return <div>
-        <div style={{display:'grid', gridTemplateColumns:'10em 10em'}}>
-            <button onClick={remove}>remove from </button>
+        <div style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
+            <button onClick={remove}>remove from</button>
             <input type="text" id="remove-from" defaultValue={10}/>
-            <button onClick={add}>add in </button>
+            <button onClick={add}>add in</button>
             <input type="text" id="add-from" defaultValue={0}/>
         </div>
-        <ol className="list-1" xyz={args.xyz} style={{'animation-duration': '3s'}}>
+        <ol className="list-1" xyz={args.xyz} style={{animationDuration: '3s'}}>
             {items.map(({item: number, phase, dx, dy, ref, done}) => (
                 <li key={'key' + number}
                     className={["item", state2class[phase]].join(' ')}
@@ -145,4 +137,34 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
 
 ComponentList.args = {
     list: [1, 2, 3, 4, 5]
+}
+
+function AnimeLatter() {
+
+    const marks = ['✗', '○'];
+
+    const [board, setBoard] = useState([]);
+    const Board = Array.from({length: 9}).map((_, i) => {
+        return board[i]
+    })
+
+    function handleBoard(mark) {
+        return function () {
+            const i = Math.floor(Math.random() * 9)
+            const mark = marks[Math.floor(Math.random() * 2)];
+            board[i] = mark;
+            setBoard([...board]);
+        }
+    }
+
+    return <div>
+        <button onClick={handleBoard('✗')}>add ✗</button>
+        <button onClick={handleBoard('○')}>add ○</button>
+        <div className="board">
+            {Board}
+        </div>
+
+    </div>
+
+
 }

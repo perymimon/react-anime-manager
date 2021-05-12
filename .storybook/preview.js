@@ -1,24 +1,35 @@
-import anysort from 'anysort'
+import theme from './theme';
 
 export const parameters = {
+  layout:'centered',
+  previewTabs: {
+    canvas: {hidden: true},
+  },
+  docs:{
+    theme,
+    source: {
+      type: 'code'
+    }
+  },
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
+    disabled: true,
     matchers: {
       color: /(background|color)$/i,
       date: /Date$/,
     },
   },
   options: {
-    storySort: (previous, next) => {
-      const [previousStory, previousMeta] = previous
-      const [nextStory, nextMeta] = next
+    storySort:{
+      order:[
+          'Overview',
+          ['Introduction'],
+          'Hooks',
+          'Usage',
+          'Examples'
+          ['AnimeManager']
 
-      return anysort(previousMeta.kind, nextMeta.kind, [
-        'Overview/Introduction',
-        'Overview/**',
-        'Usage/**',
-        'Examples/**',
-      ])
+      ]
     }
 
   },

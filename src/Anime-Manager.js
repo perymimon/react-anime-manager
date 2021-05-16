@@ -168,12 +168,30 @@ export function useChangeIntersection(tracking, options = {}) {
 }
 
 
-function madeBoxesGetter(by, states, boxMap) {
-    if (by == 'byLocation') return createLocationBoxes(states);
-    if (by == 'byPosition') return timeBoxes;
-    return WARNS.bind('noDeltaStyle', by);
+function BoxesGetter(by, states, boxMap) {
+    var boxesGetter;
+    if (by == 'byLocation') boxesGetter = LocationBoxes(states);
+    if (by == 'byPosition') boxesGetter = timeTravelBoxes;
+    if(!boxesGetter) return WARNS.bind('noDeltaStyle', by);
 
-    function timeBoxes(state) {
+    return function (state) {
+        const {box, prevBox} = boxesGetter(state)
+        const ready = () => prevBox && box;
+        const diff = (x1, x2) => ready() ? x1 - x2 : 0;
+
+        return {
+            box, prevBox,
+            get ready(){return ready()},
+            get dx() {
+                return diff(prevBox?.x, box?.x)
+            },
+            get dy() {
+                return diff(prevBox?.y, box?.y)
+            }
+        }
+    }
+
+    function timeTravelBoxes(state) {
         const {key, dom} = state;
         const box = dom?.getBoundingClientRect() ?? null;
         const prevBox = boxMap.get(key);
@@ -181,7 +199,7 @@ function madeBoxesGetter(by, states, boxMap) {
         return {box, prevBox}
     }
 
-    function createLocationBoxes(states) {
+    function LocationBoxes(states) {
         const list = [];
         for (const state of states) list[state.to] = state;
         delete list[Infinity]
@@ -193,14 +211,13 @@ function madeBoxesGetter(by, states, boxMap) {
             return {box, prevBox}
         }
     }
-
 }
 
 export function useAnimeEffect(states, options = {}) {
     const {deltaStyle = 'byPosition'} = options
     const {current: boxMap} = useRef(new Map());
     const forceRender = useDebounceRender();
-    const getBoxes = madeBoxesGetter(deltaStyle, states, boxMap)
+    const getBoxes = BoxesGetter(deltaStyle, states, boxMap)
 
     useMemo((_) => states.forEach((state, i) => {
         state.ref = React.createRef();
@@ -213,6 +230,7 @@ export function useAnimeEffect(states, options = {}) {
             done();
             boxMap.set(state.key, state?.dom.getBoundingClientRect());
         }
+        state.dxdy = ()=> getBoxes(state);
     }), [states])
 
     useLayoutEffect(function () {
@@ -220,12 +238,10 @@ export function useAnimeEffect(states, options = {}) {
         for (const state of states) {
             const {key, from, to, ref: {current: dom = null}} = state;
             state.phase = state.nextPhases.pop();
-            state.dom = dom;
-            const {box, prevBox} = getBoxes(state)
-            if (prevBox && box) {
-                state.dx = prevBox.x - box.x;
-                state.dy = prevBox.y - box.y;
-            }
+            state.dom = dom || state.dom; //if it is same key the dom not change
+            const {dx, dy} = state.dxdy();
+            state.dx = dx;
+            state.dy = dy;
         }
 
         forceRender();

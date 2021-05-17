@@ -1,23 +1,32 @@
-import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC} from "../Anime-Manager";
+import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC,PREREMOVE} from "../Anime-Manager";
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import './Anime-Manger.stories.css'
+import PropTypes from 'prop-types';
 
 const state2class = {
     [ADD]: "xyz-appear",
+    [REMOVE]: "xyz-out xyz-absolute",
+    [PREREMOVE]: "xyz-absolute",
     [REMOVE]: "xyz-out xyz-absolute",
     [MOVE]: "xyz-in",
     [STATIC]: ''
 }
 
 export default {
-    title:"Examples/AnimeManager",
-    id:"Examples",
+    title: "Examples/AnimeManager",
+    id: "Examples",
     args: {
         xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
     },
     argTypes: {
         xyz: String,
+    },
+    parameters: {
+        layout:'padded',
+        previewTabs: {
+            canvas: {hidden: true},
+        },
     }
 }
 
@@ -37,12 +46,12 @@ export const CounterDemo1 = function ({...args}) {
     ))
 }
 CounterDemo1.args = {}
-CounterDemo1.id ="counter-1"
+CounterDemo1.id = "counter-1"
 
 export const CounterDemo2 = function ({...args}) {
     const [count, setCounter] = useState(1)
     const {item: number, key, phase, done} = useAnimeManager(count, {oneAtATime: true})
-    const state2class2 = {...state2class, [REMOVE]:'xyz-out'}
+    const state2class2 = {...state2class, [REMOVE]: 'xyz-out'}
     useEffect(_ => {
         setTimeout(_ => setCounter(1 + count), 1000)
     }, [count])
@@ -89,13 +98,7 @@ export const ShowHide = ({...args}) => {
 ShowHide.args = {
     showHide: true,
 }
-ShowHide.parameters =  {
-    docs: {
-        source: {
-            type: 'code'
-        }
-    }
-}
+
 
 export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
     const [internalList, setList] = useState(list)
@@ -109,7 +112,7 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
     }
 
     function remove() {
-        let index = document.getElementById('add-from').value;
+        let index = document.getElementById('remove-from').value;
         let pos = Math.min(internalList.length - 1, +index);
         setList(internalList.filter((c, i) => i !== pos));
     }
@@ -123,20 +126,22 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
             <input type="text" id="add-from" defaultValue={0}/>
         </div>
         <ol className="list-1" xyz={args.xyz} style={{animationDuration: '3s'}}>
-            {items.map(({item: number, phase, dx, dy, ref, done}) => (
-                <li key={'key' + number}
-                    className={["item", state2class[phase]].join(' ')}
-                    ref={ref}
-                    style={{"--xyz-translate-y": `${dy}px`}}
-                    onAnimationEnd={done}
-                >{number}</li>
-            ))}
+            {items.map(({item: number, phase, ref, done, dx, dy, from, to, nextPhases}) => {
+
+                return <li key={'key' + number}
+                               className={["item", state2class[phase]].join(' ')}
+                               ref={ref}
+                               style={{"--xyz-translate-y": `${dy}px`}}
+                               onAnimationEnd={done}
+                    >{number} from:{from} to:{to} dx:{dx} dy:{dy} {nextPhases.join(',')}</li>
+                }
+            )}
         </ol>
     </div>
 }
 
 ComponentList.args = {
-    list: [1, 2, 3, 4, 5]
+    list: [1, 2]
 }
 
 function AnimeLatter() {
@@ -165,6 +170,46 @@ function AnimeLatter() {
         </div>
 
     </div>
-
-
 }
+
+export function PositionVsLocation({deltaStyle, trackingItems}) {
+    const [_, forceRender] = useState();
+
+    const itemsState = useAnimeManager(trackingItems, {
+        key: 'id',
+        useEffect: true,
+        deltaStyle,
+        protectFastChanges: false
+    });
+
+    const abc =  itemsState.map(({item, key, phase, ref, dx, dy,  dom, nextPhases}, index) => {
+        const style = {
+            width: '25em',
+            '--dx': dx,
+            '--dy': dy,
+            transform: [PREREMOVE, REMOVE].includes(phase) ? `translate(100%)` : ''
+        }
+        const className = {
+            [REMOVE]: 'animation'
+        }
+        return <div key={key} style={style}
+                    className={['item', className[phase]].join(' ')}
+                    ref={ref}>{key}: {item.name} dx:{dx} dy:{dy} phase:{phase} next:{nextPhases.join(',')}</div>
+    })
+
+    return abc;
+}
+
+PositionVsLocation.args = {
+    trackingItems: [{name: 'foo', id: 1}, {name: 'bar', id: 2}, {name: 'goo', id: 3}],
+    deltaStyle: 'byPosition',
+}
+PositionVsLocation.argTypes = {
+    deltaStyle: {
+        control: {
+            type: 'radio',
+            options: ['byPosition', 'byLocation']
+        }
+    }
+}
+PositionVsLocation.id = "position-vs-location"

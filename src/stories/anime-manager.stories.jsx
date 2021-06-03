@@ -1,7 +1,7 @@
 import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC,PREREMOVE} from "../Anime-Manager";
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
-import './Anime-Manger.stories.css'
+import './anime-manager.stories.css'
 import PropTypes from 'prop-types';
 
 const state2class = {
@@ -14,7 +14,7 @@ const state2class = {
 }
 
 export default {
-    title: "Examples/AnimeManager",
+    title: "Test",
     id: "Examples",
     args: {
         xyz: "appear-stagger-2 appear-narrow-50% appear-fade-100% out-right-100%",
@@ -63,7 +63,6 @@ export const CounterDemo2 = function ({...args}) {
 }
 CounterDemo2.args = {}
 CounterDemo2.id = "counter-2"
-
 
 /*story: OneChild*/
 export const ShowHide = ({...args}) => {
@@ -117,14 +116,15 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
         setList(internalList.filter((c, i) => i !== pos));
     }
 
-
     return <div>
+
         <div style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
             <button onClick={remove}>remove from</button>
             <input type="text" id="remove-from" defaultValue={10}/>
             <button onClick={add}>add in</button>
             <input type="text" id="add-from" defaultValue={0}/>
         </div>
+
         <ol className="list-1" xyz={args.xyz} style={{animationDuration: '3s'}}>
             {items.map(({item: number, phase, ref, done, dx, dy, from, to, nextPhases}) => {
 
@@ -133,7 +133,7 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
                                ref={ref}
                                style={{"--xyz-translate-y": `${dy}px`}}
                                onAnimationEnd={done}
-                    >{number} from:{from} to:{to} dx:{dx} dy:{dy} {nextPhases.join(',')}</li>
+                    >{number} from:{from} to:{to} dx:{~~dx} dy:{~~dy} {phase} next:[{nextPhases.join(',')}]</li>
                 }
             )}
         </ol>
@@ -142,34 +142,6 @@ export function ComponentList({list, classAppear, classIn, classOut, ...args}) {
 
 ComponentList.args = {
     list: [1, 2]
-}
-
-function AnimeLatter() {
-
-    const marks = ['✗', '○'];
-
-    const [board, setBoard] = useState([]);
-    const Board = Array.from({length: 9}).map((_, i) => {
-        return board[i]
-    })
-
-    function handleBoard(mark) {
-        return function () {
-            const i = Math.floor(Math.random() * 9)
-            const mark = marks[Math.floor(Math.random() * 2)];
-            board[i] = mark;
-            setBoard([...board]);
-        }
-    }
-
-    return <div>
-        <button onClick={handleBoard('✗')}>add ✗</button>
-        <button onClick={handleBoard('○')}>add ○</button>
-        <div className="board">
-            {Board}
-        </div>
-
-    </div>
 }
 
 export function PositionVsLocation({deltaStyle, trackingItems}) {

@@ -23,19 +23,21 @@ module.exports = {
         },
     ],
     webpackFinal: async function (config) {
-        const path = require('path');
-        addCodeboxRemark(config)
-        config.module.rules.push({
-            test: /\.scss$/,
-            use: ['style-loader', 'css-loader', 'sass-loader'],
-            include: path.resolve(__dirname, '../'),
-        });
 
-
+        addCodeboxRemark(config);
+        addScss(config)
         return config;
     }
 }
 
+function addScss(config){
+    const path = require('path');
+    config.module.rules.push({
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+        include: path.resolve(__dirname, '../'),
+    });
+}
 function addCodeboxRemark(config) {
     const remarkGridTables = require('remark-grid-tables')
     const codesandbox = require('remark-codesandbox');

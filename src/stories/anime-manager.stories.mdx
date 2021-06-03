@@ -1,3 +1,19 @@
+import {Meta, Preview, Story, Canvas, ArgsTable, Source} from '@storybook/addon-docs/blocks';
+import './story-style.css'
+import 'prismjs/themes/prism-okaidia.css';
+import {PositionVsLocation, CounterDemo1, CounterDemo2} from './anime-manager.stories'
+
+export var parameters = {
+    previewTabs: {
+        canvas: {hidden: true},
+    },
+};
+
+<Meta title="Hooks/useAnimeManager"
+      parameters={parameters}
+/>
+
+
 # Welcome to REACT ANIME MANAGER
 This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
 from the some source data to the view.
@@ -213,8 +229,8 @@ It brings all the info that need to start the animation attached to the original
 so developer can render even items that already remove from the original data add some nice removing animation
 and then after the animation done, tell hook to not bring it again.
 
-- [Options](#hook-options-arguments)
-- [ItemState Properties](#item-state-properties)
+ - [Options](#hook-options-arguments)
+ - [ItemState Properties](#item-state-properties)
 
 
 ### Syntax
@@ -316,6 +332,11 @@ There is two accepted values:
 
 *example: [story](?path=/story/examples--position-vs-location)*
 
+<Canvas>
+    <Story name="test" id="examples--position-vs-location"/>
+</Canvas>
+
+<ArgsTable name="test"  />
 
 ● `options.protectFast Changes`,is flag, default is `true`.  Hook try to take care on the situation when `tracking` changed faster than the animation of `ADD` `REMOVE` `MOVE` phases.
 It does that by hold up the `phase` until `done()` call on the current animation.
@@ -330,19 +351,20 @@ Without that protection state `phase` will jump to new value as the tracking `up
 ● `itemeState.item` The original item `itemeState` reference to on the `tracking` parameters.
 
 ● `itemeState.key` Used identify the item. It has taken from object if there is `key` identifier options or use the item himself as key if not.
-Recommended to pasting this value to new creation JSX element so will be correlation between item key to React component key.
+    Recommended to pasting this value to new creation JSX element so will be correlation between item key to React component key.
 
 
 ● `itemState.phase`, A const enum string, indicate the Phases tracking item can be:
 
-* `ADD` - It is the first time `item` show on the tracking parameters, after `done()` call the phase change to `STATIC`
-* `MOVE` - `item` location changes on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`
-* `REMOVE` - `item` are no longer on the `tracking` parameter.  after `done()` called it removed from returns `itemsState`
-* `STATIC` - Indicating nothing changed from last time tracking update
+- `ADD` - It is the first time `item` show on the tracking parameters, after `done()` call the phase change to `STATIC`
+- `MOVE` - `item` location changes on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`
+- `REMOVE` - `item` are no longer on the `tracking` parameter.  after `done()` called it removed from returns `itemsState`
+- `STATIC` - Indicating nothing changed from last time tracking update
 
 When `options.useEffect = true` another 4 "PRE" phases will trigger at the same time `itemState.justUpdate` is `true`
 in the render loop. just before the main phase. the time `dx` and `dy` are updates.
 So the whole phase list will be:
+
 - `PREADD` - `ADD` - `PREMOVE` - `MOVE` - `PRESTATIC` - `STATIC` - `PREREMOVE` - `REMOVE`
 
 ●  `itemState.done()`, A function, should be called every time animation for any `phase` complete.

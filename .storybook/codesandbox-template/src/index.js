@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import '@animxyz/core'
 import './index.css'
+import './user.css'
 
 import App from "./App";
 import { MOVE, ADD, REMOVE, STATIC } from "@perymimon/react-anime-manager";

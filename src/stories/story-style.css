@@ -1,3 +1,6 @@
+body, body [id]{
+    scroll-margin: 3em;
+}
 .subheading {
     --mediumdark: '#999999';
     font-weight: 900;

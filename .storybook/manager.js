@@ -3,9 +3,9 @@ import theme from './theme';
 
 addons.setConfig({
     theme,
-    isFullscreen: false,
+    isFullscreen: true,
     showNav: false,
-    showPanel: false,
+    showPanel: true,
     panelPosition: 'bottom',
     enableShortcuts: true,
     isToolshown: false,

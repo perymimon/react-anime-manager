@@ -13,7 +13,7 @@ export const parameters = {
   },
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
-    disabled: true,
+    disabled: false,
     matchers: {
       color: /(background|color)$/i,
       date: /Date$/,

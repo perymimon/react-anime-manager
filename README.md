@@ -1,4 +1,6 @@
-# Welcome to REACT ANIME MANAGER
+If you liked It added a star ⭐ to github project
+
+## Welcome to React Anime Manager
 This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
 from the some source data to the view.
 

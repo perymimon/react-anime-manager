@@ -1,4 +1,6 @@
-# Welcome to REACT ANIME MANAGER
+If you liked It added a star ⭐ to github project
+
+## Welcome to React Anime Manager
 This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
 from the some source data to the view.
 
@@ -29,26 +31,6 @@ some sort of way to tell when animation complete.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# How It Works
-The module `react-anime-manager` expose several hooks that can use separate but design work together through`useAnimeManager` hook.
-
-The hook `useAnimeManager` design to place between the data that create the JSX and the JSX result.
-It got the tracking data in one side and provide buffer array that contain the same date plus data from the past + essential info that tells
-if for each datum if it ADD,REMOVE, or MOVE compare to previous *data*.
-
-The info provide for each datum have among other things: `phase`, `dx`, `dy`, `done()`, `to`,`from`
-
-`phase` has 4 values: `ADD|MOVE|REMOVE|STATIC`. `ADD|MOVE|REMOVE` intend to give a clue that some animation should be attached,
-and `STATIC` phase help to clean after or create clean JSX.
-
-After new phase are determine it become stable, mean it not change until developer explicitly tell it's animation `done`
-( by calling `done()` method). just then `phase` moved to STATIC, or move to the next phase if in current animation more changes accrued.
-so there more `phases` waiting to report. if phase is `REMOVE` it called `done()` remove it completely from the buffer array
-
-e.g. If some datum added but removed quickly `phase` still has `ADD` value.
-After `done()` called `phase` will change to `STATIC` and in next animation frame it update to `REMOVE`
-and aligned with the data that tracking. Called `done()` again will remove the datum from buffer array
-
 # Install & Use
 
 Add package to your project
@@ -68,6 +50,26 @@ export function Users(users){
 }
 
 ```
+
+# How It Works
+The module `react-anime-manager` expose several hooks that can use separate but design work together through`useAnimeManager` hook.
+
+The hook `useAnimeManager` design to place between the data that create the JSX and the JSX result.
+It got the tracking data in one side and provide buffer array that contain the same date plus data from the past + essential info that tells
+if for each datum if it ADD,REMOVE, or MOVE compare to previous *data*.
+
+The info provide for each datum have among other things: `phase`, `dx`, `dy`, `done()`, `to`,`from`
+
+`phase` has 4 values: `ADD|MOVE|REMOVE|STATIC`. `ADD|MOVE|REMOVE` intend to give a clue that some animation should be attached,
+and `STATIC` phase help to clean after or create clean JSX.
+
+After new phase are determine it become stable, mean it not change until developer explicitly tell it's animation `done`
+( by calling `done()` method). just then `phase` moved to STATIC, or move to the next phase if in current animation more changes accrued.
+so there more `phases` waiting to report. if phase is `REMOVE` it called `done()` remove it completely from the buffer array
+
+e.g. If some datum added but removed quickly `phase` still has `ADD` value.
+After `done()` called `phase` will change to `STATIC` and in next animation frame it update to `REMOVE`
+and aligned with the data that tracking. Called `done()` again will remove the datum from buffer array
 
 # Examples
 

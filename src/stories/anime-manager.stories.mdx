@@ -1,7 +1,6 @@
 import {Meta, Preview, Story, Canvas, ArgsTable, Source} from '@storybook/addon-docs/blocks';
 import './story-style.css'
 import 'prismjs/themes/prism-okaidia.css';
-import {PositionVsLocation, CounterDemo1, CounterDemo2} from './anime-manager.stories'
 
 export var parameters = {
     previewTabs: {
@@ -14,7 +13,7 @@ export var parameters = {
 />
 
 
-# Welcome to REACT ANIME MANAGER
+## Welcome to React Anime Manager
 This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
 from the some source data to the view.
 
@@ -24,7 +23,7 @@ So at ~140 lines of code in one file it should be pretty easy to fork it out, ex
 The solution try to be un-opinionated about which methods are actually used for the animation as long as it has
 some sort of way to tell when animation complete.
 
-# Features
+## Features
 * ☔️Simple to use and understand
 * ⚛️100% React
 * 🚀 Blazing fast builds and performance.
@@ -44,6 +43,26 @@ some sort of way to tell when animation complete.
 - [API](#api)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Install & Use
+
+Add package to your project
+
+`npm i @perymimon/react-anime-manager`
+
+Then import it as hook into your component
+
+```jsx
+import  {useAnimeManager} from `@perymimon/react-anime-manager`;
+
+export function Users(users){
+ //                 useAnimeManager(tracking, [key | option])
+ const stateItems = useAnimeManager(users, 'id')
+ return stateItems.map( ({item:user, phase})=> <User {...user} className={phase}/>)
+
+}
+
+```
 
 # How It Works
 The module `react-anime-manager` expose several hooks that can use separate but design work together through`useAnimeManager` hook.
@@ -65,25 +84,6 @@ e.g. If some datum added but removed quickly `phase` still has `ADD` value.
 After `done()` called `phase` will change to `STATIC` and in next animation frame it update to `REMOVE`
 and aligned with the data that tracking. Called `done()` again will remove the datum from buffer array
 
-# Install & Use
-
-Add package to your project
-
-`npm i @perymimon/react-anime-manager`
-
-Then import it as hook into your component
-
-```jsx
-import  {useAnimeManager} from `@perymimon/react-anime-manager`;
-
-export function Users(users){
- //                 useAnimeManager(tracking, [key | option])
- const stateItems = useAnimeManager(users, 'id')
- return stateItems.map( ({item:user, phase})=> <User {...user} className={phase}/>)
-
-}
-
-```
 
 # Examples
 

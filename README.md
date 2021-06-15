@@ -1,13 +1,15 @@
+To The [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager)
+
 If you liked It added a star ⭐ to github project
 
 ## Welcome to React Anime Manager
-This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
-from the some source data to the view.
+Solve the problem in React about putting animation on element that Exiting, Entering, and Moving
+from the JSX after the data that created them changes.
 
-The current solution developer by hook approaches only, No dependency other than React.
-So at ~140 lines of code in one file it should be pretty easy to fork it out, expand and share it back.
+Current solution develop using hook approaches only,So no dependency other than React.
+So in one file and ~250 lines of code it should be pretty easy to fork it out, expand it and share it back.
 
-The solution try to be un-opinionated about which methods are actually used for the animation as long as it has
+The solution un-opinionated about which methods actually used for the animation as long as it has
 some sort of way to tell when animation complete.
 
 # Features
@@ -33,7 +35,7 @@ some sort of way to tell when animation complete.
 
 # Install & Use
 
-Add package to your project
+Add the package to your project
 
 `npm i @perymimon/react-anime-manager`
 
@@ -368,4 +370,5 @@ It used by `useAnimeEffect` to know the position box of the compoent each render
 ● `itemState.dx` & `itemState.dy`, A Numbers, distance in `px` dom moved on an x-axis and y-axis. `useAnimeEffect` used `deltaStyle` to decide
 the way calculate this values.
 
-● `itemState.nextPhases`, A array, when next phases will hold up until current animation done they store here22222222222222
+● `itemState.nextPhases`, A array, when next phases will hold up until current animation done they store here
+

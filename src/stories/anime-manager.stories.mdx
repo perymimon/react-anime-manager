@@ -12,15 +12,14 @@ export var parameters = {
       parameters={parameters}
 />
 
-
 ## Welcome to React Anime Manager
-This project aim to solve the problem in React about putting animation on element that Exiting, Entering, and Moving
-from the some source data to the view.
+Solve the problem in React about putting animation on element that Exiting, Entering, and Moving
+from the JSX after the data that created them changes.
 
-The current solution developer by hook approaches only, No dependency other than React.
-So at ~140 lines of code in one file it should be pretty easy to fork it out, expand and share it back.
+Current solution develop using hook approaches only,So no dependency other than React.
+So in one file and ~250 lines of code it should be pretty easy to fork it out, expand it and share it back.
 
-The solution try to be un-opinionated about which methods are actually used for the animation as long as it has
+The solution un-opinionated about which methods actually used for the animation as long as it has
 some sort of way to tell when animation complete.
 
 ## Features
@@ -40,7 +39,7 @@ some sort of way to tell when animation complete.
     - [simple counter](#simple-counter)
     - [Hidden Element](#hidden-element)
     - [List of items](#list-of-items)
-- [API](#api)
+- [API](#api-useanimemanager-exposed-by-perymimonreact-anime-manager)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -67,9 +66,9 @@ export function Users(users){
 # How It Works
 The module `react-anime-manager` expose several hooks that can use separate but design work together through`useAnimeManager` hook.
 
-The hook `useAnimeManager` design to place between the data that create the JSX and the JSX result.
-It got the tracking data in one side and provide buffer array that contain the same date plus data from the past + essential info that tells
-if for each datum if it ADD,REMOVE, or MOVE compare to previous *data*.
+The hook `useAnimeManager` design to be placed between the data that create the JSX and the JSX result.
+It got the tracking data in one side and provide `stateItems` array that contain the same date plus data from the past that come with essential info tells
+for each datum what it is relative to previous update.
 
 The info provide for each datum have among other things: `phase`, `dx`, `dy`, `done()`, `to`,`from`
 

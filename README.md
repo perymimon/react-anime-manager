@@ -1,17 +1,26 @@
-To The [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager)
 
-If you liked It added a star ⭐ to github project
 
 ## Welcome to React Anime Manager
-React-Anime-Manager is a hook approaches npm module for React that try to solve the problem in React about direct reflecting the data to the JSX. 
-so the object on the UI updated immediately widout the change for the developer to put some animations on them.
-A problem is especially noticeable when an element disappears from the list so there is nothing that you can create to made animation on.
+React-Anime-Manager is a hook approaches npm module for React that try to give developer easy way to add animation to JSX that directly reflected by data changed.
 
-The solution un-opinionated about which methods actually used for the animation as long as it has
+Like, for example, when a datum disappears from a array like.   
+If you not saved the previous array you not have any clue that some datum  are dispear to create the missing JSX from.   
+So you can't attach a animation "disapear" on anything.  
+
+If you have saved the previous array you still need to effectively compare it to the current array to find what out...     
+That what the module try to solve. give you, the developer, meta data about what happened to `array of objects` or `one object` over updates
+
+The solution is un-opinionated about which methods actually used for the animation as long as it has
 some sort of way to tell when animation complete.
 
-for security, no dependency other than React!
-write in one file of ~250 lines of code so it should be pretty easy to fork, expand and share it back.
+The module writed in one file with no dependency other than React, for security and prformance.
+about ~250 lines of code so it should be pretty easy to fork, expand and share it back.
+
+show me the code!  
+ [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager) Exmaples
+
+
+Add a star ⭐ to Github project if you like it. 
 
 
 # Features

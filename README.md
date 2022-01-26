@@ -69,12 +69,11 @@ The *react-anime-manager* must be placed between the data that creates the JSX a
 
 The imported keys of each datum's metadata are: `phase`, `dx`, `dy`, `done()`, `to`,`from`
 
-Phases have the following values: `ADD` `MOVE` `REMOVE` `STATIC`.
- `ADD` `MOVE` `REMOVE` are intended to indicate that some animation should be included. `STATIC` assists with cleaning after or creating JSX that is clean.
+ *phase* have the following values: `ADD` `MOVE` `REMOVE` `STATIC`.
+the first three are intended to indicate that some animation should be made. `STATIC` phase assists with cleaning after or creating JSX that is clean.
 
-When phase is `MOVE` `to` and `form` mention from which position on the tracking array it moves to. 
-
-`dx` `dy` tells how many pixels the rendered DOM moved from the last rendered
+When phase is `MOVE` keys `to` and `form` refers to the location on the original tracking array.     
+When phase are changed `dx` `dy` tells how many pixels the rendered DOM moved from the last updated
 
 The phase becomes stable when it is marked on *phase*, which means it will not change until a developer explicitly calls the `done()` callback.
 Then `phase` switched to `STATIC` and in the next animation frame if more changes were made to the tracking's data the next phase was applied.
@@ -83,58 +82,74 @@ When phase marked as `REMOVE` and `done()` called. The metadata's datums were re
 
 # Examples
 
-## simple counter
+## 💻 simple primitive counter
 
 Let's create animated counter.
 
-`stateItems` used to create the returns JSX.
+`stateItems` store the metadata's tracking data and used to create the returns JSX.     
 `tracking` is just a simple primitive number, So the number himself used as a key for each `stateItem`.
 
 ```js codesandbox=animeManager
 import {useAnimeManager} from '@perymimon/react-anime-manager'
 
 export default function Counter({state2class, args}) {
-    //1. first: stateItems = [{item: 1, phase: ADD, from: Infinity, to: 0, done}]
-    //2. <div> created with animation for ADD phase.
-    //3.  when `onAnimationEnd` accrued `done()` called. and then
-    //       -  `stateItem.phase == STATIC`
-    //4. after 2 `setTimeout` called  with `setCounter(2)`
-    //5. component reRender again and now 2 go inside `useAnimeManger` and it output:
-    // stateItems = [
-    //     {item: 1, phase: REMOVE, from: 0, to: 0, done},
-    //     {item: 2, phase: ADD, from: Infinity, to: 0, done}
-    // ]
-    // and two div render one with removed animation and the other with add animation
-    // 6. when `item:1.done()` called `item:1` removed from the list. and reRender occurs. so
-    //      stateItems = [{item: 2, phase: 'static', from: Infinity, to: 0, done}]
-    // 7. when `item:2.done()` called his phase update from `ADD` to `STATIC` and reRender occurs.
-    // ...
-    // Setra and Setra
-    const [count, setCounter] = useState(1)
-    const stateItems = useAnimeManager(count)
+    
+  const [count, setCounter] = useState(1)
+  const stateItems = useAnimeManager(count)
 
+  useEffect(_ => {
+      setTimeout(_ => {
+          setCounter(count + 1);
+      }, 2000)
+  }, [count])
 
-    useEffect(_ => {
-        setTimeout(_ => {
-            setCounter(count + 1);
-        }, 2000)
-    }, [count])
-
-
-    return stateItems.map(({item: number, key, phase, done}) => (
-        <div key={key} xyz={args.xyz} className={"item " + state2class[phase]}
-             onAnimationEnd={done}>{number}</div>
-    ))
+  return stateItems.map(({item: number, key, phase, done}) => (
+      <div key={key} xyz={args.xyz} className={"item " + state2class[phase]}
+           onAnimationEnd={done}>{number}</div>
+  ))
 
 }
+
+/* how it works, in steps:
+ steps 1:
+  stateItems = [{item: 1, phase: ADD, from: Infinity, to: 0, done}]
+  one <div class="item ADD">1<div> to make a ADD animation.
+ steps 2: 
+   `done()` called when `onAnimationEnd` accure useAnimeManager update stateItem[0].phase to `STATIC` and the componenet forced to rerender.
+   <div class="item STATIC> recreated 
+ step 3:   
+  setTimeout called and do `setCounter(2)` the component rerender again and now 2 go inside useAnimeManger.
+  the result  is:
+    stateItems = [
+      {item: 1, phase: REMOVE, from: 0, to: 0, done},
+      {item: 2, phase: ADD, from: Infinity, to: 0, done}
+   ]
+  so two div renders:
+   <div class="item REMOVE">1<div> 
+   <div class="item ADD">2<div> 
+   one with removed animation and the other with add animation
+ step 4:
+  when `done()` called after the remove animation complate on <div>1</div> 
+  the component rerender again. `2` is still going inside `useAnimeManger`.
+  but now  :
+    stateItems = [
+      {item: 2, phase: ADD, from: Infinity, to: 0, done}
+   ]
+ step 5: 
+  when `done()` called add animation complete on <div>2</div> 
+  the component rerender again. `2` still go inside `useAnimeManger`.
+  but now: 
+    stateItems = [
+      {item: 2, phase: STATIC, from: Infinity, to: 0, done}
+    ]
+ ... Setra and Setra
+ */
 ```
-
-
 ## Hidden Element
 
-`useAnimeManager` also used to animate a boolean flag .
+`useAnimeManager` also can used to animate a boolean flag .
 
-Usual because `true` and `false` considers as a different items each with its own state `useAnimeManager` return `array.length == 2` one item for tracking `false` and other item for tracking `true`.
+Because `true` and `false` considers as a different items each with its own state `useAnimeManager` return `array.length == 2` one item for tracking `false` and other item for tracking `true`.
 But because `{oneAtATime:true}` option add to `useAnimeManager` it return just the first state's item each time and hold  other changes until`done` called on `remove` phase.
 
 This approch save from dealing with `array.map` when It is not necessary.

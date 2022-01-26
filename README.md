@@ -149,10 +149,9 @@ export default function Counter({state2class, args}) {
 
 `useAnimeManager` also can used to animate a boolean flag .
 
-Because `true` and `false` considers as a different items each with its own state `useAnimeManager` return `array.length == 2` one item for tracking `false` and other item for tracking `true`.
-But because `{oneAtATime:true}` option add to `useAnimeManager` it return just the first state's item each time and hold  other changes until`done` called on `remove` phase.
+Since *true* and *false* treat each as a separate item with a separate state, *useAnimeManager* should return array.length == 2, however because the *{oneAtATime:true}* option was added, it returns every time only the first state's item and holds other items until the REMOVE phase removes them.
 
-This approch save from dealing with `array.map` when It is not necessary.
+This approach saves to dealing with `array.map` when it is not necessary.
 
 ```jsx codesandbox=animeManager
 import {useAnimeManager} from '@perymimon/react-anime-manager'
@@ -178,10 +177,10 @@ export default function ShowHide({state2class, args}) {
     </div>
 
 }
+/*
+ note: In this implementation there is no element when the flag equals false, so to keep the flow going it is necessary to call *done()* on all phases of {item:false} to show the `true` when it arrives.
+*/
 ```
-Note: because there is no element when `flag == false` `done()` must called expliclty to
-guide `useAnimeManager` continue with the states flow and show the `true` value when it arrives.
-
 
 ## List of items
 

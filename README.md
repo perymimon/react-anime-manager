@@ -17,7 +17,7 @@ The module writed in one file with no dependency other than React, for security 
 about ~250 lines of code so it should be pretty easy to fork, expand and share it back.
 
 show me the code!  
- [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager) Exmaples
+ [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager) Tests Exmaples
 
 
 Add a star ⭐ to Github project if you like it. 

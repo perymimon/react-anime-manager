@@ -1,26 +1,25 @@
 
 
 ## Welcome to React Anime Manager
-React-Anime-Manager is a hook approaches npm module for React that try to give developer easy way to add animation to JSX that directly reflected by data changed.
+React-Anime-Manager is a hook approach npm module for React that tries to give developers an easy way to add animation to JSX that is directly reflected by data changed.
 
-Like, for example, when a datum disappears from a array like.   
-If you not saved the previous array you not have any clue that some datum  are dispear to create the missing JSX from.   
-So you can't attach a animation "disapear" on anything.  
+For example, when a datum disappears from an array-like.   
+If you did not save the previous array you do not have any clue that some data are missing to create the missing JSX.   
+So you can't attach an animation "disappear" on anything.  
 
 If you have saved the previous array you still need to effectively compare it to the current array to find what out...     
-That what the module try to solve. give you, the developer, meta data about what happened to `array of objects` or `one object` over updates
+That is what the module tries to solve. give you, the developer, metadata about what happened to `array of objects` or `one object` over updates
 
-The solution is un-opinionated about which methods actually used for the animation as long as it has
-some sort of way to tell when animation complete.
+The solution is un-opinionated about which methods actually used for the animation as long as it has some sort of way to tell when animation is complete.
 
-The module writed in one file with no dependency other than React, for security and prformance.
-about ~250 lines of code so it should be pretty easy to fork, expand and share it back.
+The module is written in one file with no dependency other than React, for security and performance.
+About ~250 lines of code. so it should be pretty easy to fork, expand and share it back.
 
-show me the code!  
+Show me the code!  
  [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/badge-storybook.svg)](https://perymimon.github.io/React-Anime-Manager) Tests Exmaples
 
 
-Add a star ⭐ to Github project if you like it. 
+Add a star ⭐ to the Github project if you like it. 
 
 
 # Features
@@ -54,35 +53,33 @@ Then import it as hook into your component
 
 ```jsx
 import  {useAnimeManager} from `@perymimon/react-anime-manager`;
+// function useAnimeManager(tracking, [key | option]) return array
 
 export function Users(users){
- //                 useAnimeManager(tracking, [key | option])
- const stateItems = useAnimeManager(users, 'id')
- return stateItems.map( ({item:user, phase})=> <User {...user} className={phase}/>)
-
+  const stateItems = useAnimeManager(users, 'id')
+  return stateItems.map( ({item:user, phase})=> <User {...user} className={phase}/>)
 }
 
 ```
 
 # How It Works
-The module `react-anime-manager` expose several hooks that can use separate but design work together through`useAnimeManager` hook.
+`react-anime-manager` module exposes several hooks that can be used separately but actually work together through the `useAnimeManager` hook.
 
-The hook `useAnimeManager` design to place between the data that create the JSX and the JSX result.
-It got the tracking data in one side and provide buffer array that contain the same date plus data from the past + essential info that tells
-if for each datum if it ADD,REMOVE, or MOVE compare to previous *data*.
+The *react-anime-manager* must be placed between the data that creates the JSX and the JSX result to create a new array that contains the original data as well as the data's metadata. Including metadata on removed datums 
 
-The info provide for each datum have among other things: `phase`, `dx`, `dy`, `done()`, `to`,`from`
+The imported keys of each datum's metadata are: `phase`, `dx`, `dy`, `done()`, `to`,`from`
 
-`phase` has 4 values: `ADD|MOVE|REMOVE|STATIC`. `ADD|MOVE|REMOVE` intend to give a clue that some animation should be attached,
-and `STATIC` phase help to clean after or create clean JSX.
+Phases have the following values: `ADD` `MOVE` `REMOVE` `STATIC`.
+ `ADD` `MOVE` `REMOVE` are intended to indicate that some animation should be included. `STATIC` assists with cleaning after or creating JSX that is clean.
 
-After new phase are determine it become stable, mean it not change until developer explicitly tell it's animation `done`
-( by calling `done()` method). just then `phase` moved to STATIC, or move to the next phase if in current animation more changes accrued.
-so there more `phases` waiting to report. if phase is `REMOVE` it called `done()` remove it completely from the buffer array
+When phase is `MOVE` `to` and `form` mention from which position on the tracking array it moves to. 
 
-e.g. If some datum added but removed quickly `phase` still has `ADD` value.
-After `done()` called `phase` will change to `STATIC` and in next animation frame it update to `REMOVE`
-and aligned with the data that tracking. Called `done()` again will remove the datum from buffer array
+`dx` `dy` tells how many pixels the rendered DOM moved from the last rendered
+
+The phase becomes stable when it is marked on *phase*, which means it will not change until a developer explicitly calls the `done()` callback.
+Then `phase` switched to `STATIC` and in the next animation frame if more changes were made to the tracking's data the next phase was applied.
+
+When phase marked as `REMOVE` and `done()` called. The metadata's datums were removed from the metadata's array
 
 # Examples
 

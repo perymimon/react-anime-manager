@@ -3,14 +3,16 @@ To The [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@master/badge/
 If you liked It added a star ⭐ to github project
 
 ## Welcome to React Anime Manager
-Solve the problem in React about putting animation on element that Exiting, Entering, and Moving
-from the JSX after the data that created them changes.
-
-Current solution develop using hook approaches only,So no dependency other than React.
-So in one file and ~250 lines of code it should be pretty easy to fork it out, expand it and share it back.
+React-Anime-Manager is a hook approaches npm module for React that try to solve the problem in React about direct reflecting the data to the JSX. 
+so the object on the UI updated immediately widout the change for the developer to put some animations on them.
+A problem is especially noticeable when an element disappears from the list so there is nothing that you can create to made animation on.
 
 The solution un-opinionated about which methods actually used for the animation as long as it has
 some sort of way to tell when animation complete.
+
+for security, no dependency other than React!
+write in one file of ~250 lines of code so it should be pretty easy to fork, expand and share it back.
+
 
 # Features
 * ☔️Simple to use and understand

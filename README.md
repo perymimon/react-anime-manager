@@ -145,7 +145,7 @@ export default function Counter({state2class, args}) {
  ... Setra and Setra
  */
 ```
-## Hidden Element
+## 💻Hidden Element
 
 `useAnimeManager` also can used to animate a boolean flag .
 
@@ -182,32 +182,32 @@ export default function ShowHide({state2class, args}) {
 */
 ```
 
-## List of items
+## 💻List of items
 
-Here example that show much of `useReactAnime` main propose: handling array or items.
+Here is an example that shows much of the `useReactAnime` main proposal: handling array of items.
 
-when `{useEffect: true}` `useAnimeManager` bring a `ref` key that should attach to result JSX
-in return it enriches state of each item with:
+When `{useEffect: true}` `useAnimeManager` brings a `ref` key that should attach to the result JSX. These *ref* give access to the element's dom of the JSX so that some calculations can be made and metadata can be added: 
 
-* `dom` - Actual dom's root .
-* `dx` & `dy` - Distance each dom's element moves relative to his previous update
-* new PRE states `PREADD|PREMOVE|PREREMOVE` that accrued before `dx` and `dy` calculated
+*dom* - Actual element of the DOM.     
+*dx* & *dy* - Distance between each DOM element and its previous update      
+The *phase* calculation now includes prephases that accrued before the main phases.     
+That include: *PREADD*, *PREAMINW*, and *PRENEW* that are assigned before *dx* and *dy*     
 
-Of course `ref` key needed to follow React explains about [ref](https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper)
+For *ref* key it's required to follow React's documentation about how attach ref works
+[ref](https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper).
 
 ```jsx codesandbox=animeManager
 import {useAnimeManager, STATIC, ADD, REMOVE, MOVE} from '@perymimon/react-anime-manager'
 
+var globalCounter = 5;
 export default function ComponentList({state2class, args}) {
-    const [list, setList] = useState([1, 2, 3, 4, 5])
-    const counter = useRef(list.length)
-    const statesItems = useAnimeManager(list, {useEffect: true});
+    const [externalList, setExternalList] = useState([1, 2, 3, 4, 5])
+    const statesItems = useAnimeManager(externalList, {useEffect: true});
 
     function handleAdd() {
         let pos = Math.floor(Math.random() * list.length);
-        let newItem = ++counter.current;
-        list.splice(pos, 0, newItem);
-        setList([...list]);
+        let newItem = ++globalCounter;
+        setList([... list.splice(pos, 0, newItem)]);
     }
 
     function handleRemove() {
@@ -216,12 +216,12 @@ export default function ComponentList({state2class, args}) {
     }
 
     return <div xyz={args.xyz}>
-        <button onClick={handleAdd}>add in random</button>
-        <button onClick={handleRemove}>remove from random</button>
+        <button onClick={handleAdd}>add in random position</button>
+        <button onClick={handleRemove}>remove from random postion</button>
         <ol className="list">
             {statesItems.map(({item: number, phase, dx, dy, ref, done}) => (
                 <li key={'key' + number}
-                    className={["item", state2class[phase]].join(' ')}
+                    className=`item ${state2class[phase]}`
                     ref={ref}
                     style={{'--xyz-translate-y': `${dy}px`}}
                     onAnimationEnd={done}
@@ -231,13 +231,13 @@ export default function ComponentList({state2class, args}) {
     </div>
 }
 ```
+# API
+##  🖹 `useAnimeManager` ( exposed by `@perymimon/react-anime-manager` ) 
 
-## API `useAnimeManager` exposed by `@perymimon/react-anime-manager`
+It's a hook that tracks the entry, movement and exit of items from collection.
+It brings all the metadata info needed to activate animation from the JSX step or from the DOM's element that was created from that JSX. Also, it allows items that have been removed from the collection to be recreated so that you can make remove-animation on them.
 
-help track after entering, moving and exiting items from collection.
-It brings all the info that need to start the animation attached to the original item,
-so developer can render even items that already remove from the original data add some nice removing animation
-and then after the animation done, tell hook to not bring it again.
+You should note that it's mandatory to call `done()` callback, exposed by the hook, to let the manager know that the element is done with its current state and now it has a static state or should be removed completely from the tracking state.
 
 - [Options](#hook-options-arguments)
 - [ItemState Properties](#item-state-properties)

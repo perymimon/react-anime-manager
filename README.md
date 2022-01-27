@@ -233,82 +233,60 @@ export default function ComponentList({state2class, args}) {
 ```
 # API
 ##  🖹 `useAnimeManager` ( exposed by `@perymimon/react-anime-manager` ) 
+```jsx
+import {useAnimeManager} from '@perymimon/react-anime-manager'
+
+itemStates = useAnimeManager( tracking [, key|{
+    oneAtATime: false,
+    useEffect: false,
+    protectFastChanges: true,
+    key:undefined,
+    deltaStyle: 'bySelfLocationChange'
+})
+```
 
 It's a hook that tracks the entry, movement and exit of items from collection.
 It brings all the metadata info needed to activate animation from the JSX step or from the DOM's element that was created from that JSX. Also, it allows items that have been removed from the collection to be recreated so that you can make remove-animation on them.
 
 You should note that it's mandatory to call `done()` callback, exposed by the hook, to let the manager know that the element is done with its current state and now it has a static state or should be removed completely from the tracking state.
 
-- [Options](#hook-options-arguments)
-- [ItemState Properties](#item-state-properties)
+● `tracking: array<object> | object` :  can by object, primitive or array like of objects with unique id.
+example of primitive:`true/false` `0/1/2/3`  `"foo" | "bar"`
+example of objects` : `[{name:'foo',id:1},{name:'bar',id:2}]`
 
+●  `key: string` : case-sensitive string represented object's key name that used to identify items on the `tracking` argument.`key` can be as the second argument or as a key inside the options object. it's mandatory if tracking is object or array of objects but if tracking is primitive the accual value of the tracking will used as a key. 
+example:
+`useAnimeManager(tracking, 'id')` 
+`useAnimeManager(tracking, {key:'id'})`
+●  `options: object`: optional object with the following optional [settings](/#Options)   
+● `itemStates`: metadata on each tracking items with the follwing key as describe [here](/#ItemState instance)
 
-### Syntax
-
-```jsx
-import {useAnimeManager} from '@perymimon/react-anime-manager'
-
-itemStates = useAnimeManager( tracking [, key|options])
-
-// Options Default
-{
-    oneAtATime: false,
-    useEffect: false,
-    protectFastChanges: true,
-    key:undefined,
-    deltaStyle: 'bySelfLocationChange'
-}
-
-const  {item, key, from, to, justUpdate, phase, nextPhases, done } = itemStates
-
-// if useEffect = true
-const  {item, key, from, to, justUpdate, phase, nextPhases, done, ref, dom, dx, dy  } = itemStates
-```
-
-● `tracking` is the value or values that we want to track and know there state compare to previous tracking to just coming fresh.
-
-location in the order of the tracking list ;
-It can be from the types: primitive, object, array of primitives or objects.
-
-If it `object` or `objects[]` the second argument must provide `key` parameter to identify each
-object. `key` can be omitted if tracking values are primitives or array of primitives, in those cases value of each primitive
-used as an identifier key.
-
-```jsx
-/*primitive:*/ `true/false` `0/1/2/3`  `"foo" | "bar"`
-/* objects :*/ `[{name:'foo',id:1},{name:'bar',id:2}]`
-```
-
-● `key` is a case-sensitive string represented object's key name that used to identify items on the `tracking` argument.
-`key` can be put as the second argument or as a key inside the options object
-
-```jsx
-useAnimeManager(tracking, 'id')
-useAnimeManager(tracking, {key:'id'})
-```
 #### Options
 
-● `options.key`
-exactly as `key`
+● `options.key:string`: As describe above
+● `options.oneAtATime:boolean` default `false`.
+if `false` array of metadata's objects will return otherwise if value is `false` the first (oldest) metadata object will return 
+In some cases it more sense to stick to older tracking item until it animation-remove will complete before change it  to fresh value. 
 
-● `options.oneAtATime` is flag, default is `false`. by default `useAnimeManager` returns array. If we want to got just the oldest `stateItem` object
-we can mark it as `true`. In some cases it makes more sense returns just the older `itemState` object, like when tracking are just primitive.
-And got the next one after `done()` called on `REMOVE` phase.
-
+example of return metadata's items over updating time per value:
+when `{oneAtATime:false}`
 ```jsx
-//oneAtATime:true
-stateItem = useAnimeManager(true,{oneAtATime:true})
-// expected output {item:true, phase:ADD, done(), ...}
-stateItem = useAnimeManager(false,{oneAtATime:true})
-// expected output  {item:true, phase:REMOVE, done(), ...}
+stateItems = useAnimeManager(true,{oneAtATime:false})
+// stateItems = [{item:true, phase:ADD, done(), ...}]
+stateItems = useAnimeManager(false,{oneAtATime:false})
+//stateItems = [{item:true, phase:REMOVE, done(), ...}, {item:false, phase:ADD, done(), ...}]
 ```
 
+when `{oneAtATime:true}`
+
 ```jsx
-// oneAtATime:false
-stateItems = useAnimeManager(true,{oneAtATime:false})
-// expected output [{item:true, phase:ADD, done(), ...}]
-stateItems = useAnimeManager(false,{oneAtATime:false})
-// expected output  [{item:true, phase:REMOVE, done(), ...}, {item:false, phase:ADD, done(), ...}]
+stateItem = useAnimeManager(true,{oneAtATime:true}) 
+//stateItem = {item:true, phase:ADD, done(), ...}
+ ```
+Then tracking update to `false`
+```
+stateItem = useAnimeManager(false,{oneAtATime:true})
+//stateItem = {item:true, phase:REMOVE, done(), ...}
 ```
 
 ● `options.useEffect` is flag, default is `false`.

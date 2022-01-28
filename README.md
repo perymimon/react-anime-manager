@@ -365,6 +365,6 @@ in next loop in will be `false`. It can be used to trigger something one-time
 
 ● `metadata.dom:DOM`: A dom reference, equal to `metadata.ref.current`.
 
-● `metadata.dx:number` & `metadata.dy:number`: the distance DOM moved in `dx` on an x-axis and y-axis. `useAnimeEffect` used `options.deltaStyle` to decide the way calculate that's values.
+● `metadata.dx:number` & `metadata.dy:number`: the distance DOM moved on x-axis and y-axis. `options.deltaStyle` used to decide the way calculate should made.
 
-● `metadata.nextPhases`: A array, when next phases will hold up until current animation done they store here
+● `metadata.nextPhases:array`: next phases that hold up until current animation done stored here

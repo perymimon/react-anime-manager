@@ -4,15 +4,15 @@
 React-Anime-Manager is a hook approach npm module for React that tries to give developers an easy way to add animation to JSX that is directly reflected by data changed.
 
 For example, when a datum disappears from an array-like.   
-If you did not save the previous array you do not have any clue that some data are missing to create the missing JSX.   
-So you can't attach an animation "disappear" on anything.  
+If you did not save the previous array you do not have any clue that there is item that dispear for make animation on it.   
+If so you have saved the previous array you still need to effectively compare it to the current array to find what out changed.     
 
-If you have saved the previous array you still need to effectively compare it to the current array to find what out...     
 That is what the module tries to solve. give you, the developer, metadata about what happened to `array of objects` or `one object` over updates
 
-The solution is un-opinionated about which methods actually used for the animation as long as it has some sort of way to tell when animation is complete.
+The solution is agnostic about which methods actually used for the animation as long as it has some sort of way to tell when animation is complete.
 
 The module is written in one file with no dependency other than React, for security and performance.
+
 About ~250 lines of code. so it should be pretty easy to fork, expand and share it back.
 
 Show me the code!  
@@ -65,20 +65,20 @@ export function Users(users){
 # How It Works
 `react-anime-manager` module exposes several hooks that can be used separately but actually work together through the `useAnimeManager` hook.
 
-The *react-anime-manager* must be placed between the data that creates the JSX and the JSX result to create a new array that contains the original data as well as the data's metadata. Including metadata on removed datums 
+`useAnimeManager` tracks after the entry, movement and exit of items on a collection. It brings all the metadata info needed to activate animation based on that changed on the JSX level or directly on the DOM's element that was created from that JSX. Also, it allows items that have been removed from the collection to be recreated so you have the chance to made some remove-animation on them.
 
-The imported keys of each datum's metadata are: `phase`, `dx`, `dy`, `done()`, `to`,`from`
+The `useAnimeManager` must be placed between the data that creates the JSX and the JSX result to create a new array that contains the original data as well as the data's metadata. Including metadata on removed datums 
 
- *phase* have the following values: `ADD` `MOVE` `REMOVE` `STATIC`.
-the first three are intended to indicate that some animation should be made. `STATIC` phase assists with cleaning after or creating JSX that is clean.
+The imported keys each datum's metadata exposed are: `phase`, `dx`, `dy`, `done()` and also  `to` and `from`
 
-When phase is `MOVE` keys `to` and `form` refers to the location on the original tracking array.     
-When phase are changed `dx` `dy` tells how many pixels the rendered DOM moved from the last updated
+`done()` callback need to be call when some animation's phase are done. It's mandatory to call it to let the manager know that the element is done with its current state and now it's phase should update to static state or should be removed completely.
 
-The phase becomes stable when it is marked on *phase*, which means it will not change until a developer explicitly calls the `done()` callback.
-Then `phase` switched to `STATIC` and in the next animation frame if more changes were made to the tracking's data the next phase was applied.
+`phase` have the following values: `ADD` `MOVE` `REMOVE` `STATIC`.The first three are intended to indicate that some animation should be made.
+ `STATIC` phase assists with cleaning-after or creating clean JSX. ex. developer need to remove class before add it again on the next phase.
 
-When phase marked as `REMOVE` and `done()` called. The metadata's datums were removed from the metadata's array
+`to` and `form` refers to the position on the tracking array. And every time phase are changed `dx` `dy` tells how many pixels the rendered DOM moved from the last updated. The hook takes care to keep The phase stable, which means it will not change until the developer explicitly calls the `done()`.
+After `done()` are called `phase` will switched to `STATIC`. If more changes were made to the tracking's data the next phase was applied (in the next animation frame).
+When phase marked as `REMOVE` and `done()` called. The datums's metadata were removed completely from the array's metadata
 
 # Examples
 
@@ -258,36 +258,31 @@ itemStates = useAnimeManager( tracking [, key|{
 })
 ```
 
-`useAnimeManager` is a hook that tracks after the entry, movement and exit of items from collection. It brings all the metadata info needed to activate animation based on that actions on the JSX step or direct on the DOM's element that was created from that JSX. Also, it allows items that have been removed from the collection to be recreated there JSX so you have the chance to make remove-animation on them.
+● `tracking:array<object>|object`: Can be object, primitive, or array-like of objects.
 
-Also the hook exposed `done()` callback to call when some animation's phase are done. It's mandatory to call it to let the manager know that the element is done with its current state and now it's phase should update to static state or should be removed completely from the tracking state.
-
-● `tracking: array<object> | object` :  can by object, primitive, or array-like of objects with unique id.
 example of primitive: `true/false` `0/1/2/3`  `"foo" | "bar"`
 example of objects` : `[{name:'foo',id:1},{name:'bar',id:2}]`
 
-●  `key: string` : case-sensitive string represented object's key's name that used to identify each item on the tracking array-like. `key` can be set at the second argument or inside the options object. If tracking is object or array of objects that argument are mandatory . but if tracking is primitive the accual value of that primitive will used as the key. 
+● `key:string`: case-sensitive string represented object's key's name that used to identify each item on the tracking array-like. `key` can be set litral at the second argument of the hook or inside the options object. If tracking is object or array-like of objects that argument are mandatory . but if tracking is primitive the accual value of that primitive will used as the key. 
 
 example:
 `useAnimeManager(tracking, 'id')` 
 `useAnimeManager(tracking, {key:'id'})`
 
-●  `options: object`: optional object with the following optional [settings](/#Options)   
+●  `options:object`: optional object with the following optional [settings](/#Options)   
 
 ● `itemStates`: metadata return for each tracking items with the follwing key as describe [here](/#ItemState instance)
 
-#### Options:object setting
+## Options:object setting
 
 ● `options.key:string`: As describe above
 
 ● `options.oneAtATime:boolean` default `false`.
-control if retunts will be array of metadata or just the first (oldest) one
-In some cases it more sense to stick to older tracking item until it animation-remove will complete before dealing with the next one. like if the original tracking is not array-like of items.
+control if retunts metadata will be array or object of the first (oldest) tracking item.
 
-example of the different between `{oneAtATime:true}` and `{oneAtATime:false}`
+In some cases it more sense to stick to older tracking item until it animation-remove will complete before dealing with the next one. like if the original tracking is not array-like of items.here are exmaple of the different between `{oneAtATime:true}` and `{oneAtATime:false}`
 
 when `{oneAtATime:false}`
-
 ```jsx
 stateItems = useAnimeManager(true,{oneAtATime:false})
 // stateItems = [{item:true, phase:ADD, done(), ...}]
@@ -297,7 +292,6 @@ stateItems = useAnimeManager(false,{oneAtATime:false})
 ```
 
 when `{oneAtATime:true}`
-
 ```jsx
 stateItem = useAnimeManager(true,{oneAtATime:true}) 
 //stateItem = {item:true, phase:ADD, done(), ...}
@@ -305,13 +299,12 @@ stateItem = useAnimeManager(true,{oneAtATime:true})
 stateItem = useAnimeManager(false,{oneAtATime:true})
 //stateItem = {item:true, phase:REMOVE, done(), ...}
 ```
-● `options.useEffect` is flag, default is `false`.
-if active use another render loop to bring after-render knowledge about the dom that created by the tracking datums.
 
-*ref* key exposed on the metadata when active. that `ref` should be attached to return JSX according to Reacd doc about using ref hook. with it, in the next render,  that is to say into `useEffect` hook, `ref` will point to the real dom element created by the JSX.
-with that,  updated change distance calculated and attach to metadata item as `dx` and `dy` keys.
+● `options.useEffect:boolean` default is `false`:
+if active another render loop will use to bring knowledge about the dom that created by the JSX.
+To do that a `ref` key exposed on each metadata. that `ref` should be attached to return JSX ( according to Reacd doc about using ref hook ). with it, in the next render,  that `ref` will hold the real dom element created. and with that, change distance will calculated and attach to item's metadata as `dx` and `dy` .
 
-● `options.deltaStyle`,a case-sensitive string used to guide how to calculate `dx` and `dy`.
+● `options.deltaStyle:string`:a case-sensitive string used to guide how to calculate `dx` and `dy`.
 
 There is two accepted values:
 
@@ -336,49 +329,42 @@ There is two accepted values:
 *example: [story](?path=/story/examples--position-vs-location)*
 
 
-● `options.protectFast Changes:boolean`,default is `true`: 
-In normal the Hook try to take care on the situation when `tracking` changed faster than the animations . It does that by hold up the `phase` until `done()` call on the current animation.If more will come it aggregate the changes and resolve them one by one after `done()` called on the previous `phase`. resolve mean `phase` will update to `STATIC` ( so some clean will render or made ) and then it update to next phase. 
+● `options.protectFastChanges:boolean`,default is `true`: 
+Normal behavior of the Hook is to take care on the situation when `tracking` changed faster than the animations . It does that by hold up the `phase` until `done()` call on the current animation. If more changes will come it aggregate the changes and resolve them one by one after each `done()`. Resolve mean: `phase` will update to `STATIC` ( so some clean will render or made ) and then it update to next phase. 
 
-when `{protectFast:false } `phase` will jump to the new phase as the tracking update .
+when `{protectFast:false}` is set `phase` will jump to the new phase as soon as the `tracking` update .
 
 #### metadata instance
 --------------------------------------
 
-● `metadata.item` The original item that metadata refers to on the `tracking` parameter.
+● `metadata.item:any` The original item that metadata refers to on the `tracking` parameter.
 
-● `metadata.key` The key that actually used to identify the item. It can be the value of `key` identifier or the item himself depending on the circumstances/
+● `metadata.key:string` The key that actually used to identify the item. It can be the value of `key` identifier or the item himself depending on the circumstances/
 it is easy and Recommended to paste this value to the `key` argument on the JSX element so it will be a correlation between item key to React component key.
 
-● `metadata.phase`, A enum string, indicate the Phases item's tracking can be:
-* *`PREADD` - first-time item is shown, but before internal `useEffect` calculate `dx` and `dy`.
-* `ADD` - Mean it is the first time item shown on the tracking parameters, after `done()` call the phase change to `STATIC`
+● `metadata.phase:string`, A enum string, indicate the item's phases can be:
+ * `ADD` - set when it is the first time item shown on the tracking parameters, after `done()` call the phase change to `STATIC`
+ * `MOVE` - `item` location changed on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`.
+ * `STATIC` - Indicating nothing changed from last time tracking update
+ * `REMOVE` - `item` are no longer on the `tracking` parameter.  after `done()` called it removed from returns hook cache 
 
-* *`PREMOVE` - item location changed, but before internal `useEffect` calculate `dx` and `dy`. 
-* `MOVE` - `item` location changed on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`.
+As mentioned, when `useEffect = true` is set the item's metadata will calculate twice. first when the change detected with some metadata. next after DOM holded and `dx`  and `dy` are calculated. To distinguish between the two situations and to allow for proper preparation, another set of `phases` was created: `PREADD` `PREMOVE` `PRESTATIC` `PREREREMOVE`. that phases set on the first update and the clasic phases set on the seconed update.
+ 
+●  `metadata.done()`: A callback function that must called every time it's safe to indicate the current phase is completed to handle . like when animation done or skiped. 
 
-* *`PRESTATIC` -  Indicating nothing changed from last time tracking update, but before internal `useEffect` calculate `dx` and `dy`. 
-* `STATIC` - Indicating nothing changed from last time tracking update
+●  `metadata.from:number`: index of tracking item's in the previous array . If item is `new` from-value will be `Infinity`. if tracking is not array-like value will be 0
 
-* * `PREREMOVE` -  `item` are no longer on the `tracking` parameter, but before internal `useEffect` calculate `dx` and `dy`. 
-* `REMOVE` - `item` are no longer on the `tracking` parameter.  after `done()` called it removed from returns hook cache 
+● `metadata.to:number`: index of tracking items on current `tracking`. If the item is just `REMOVED` the value will be Infinity. if tracking is not array-like value will be 0
 
-* that phases exist just if `useEffect = true` 
-
-●  `metadata.done()`, A callback function that must called, every time it's safe indicate current phase is complete handle . like when animation done. 
-
-●  `metadata.from:number`, index of tracking item's in the previous array . If item is `new` from-value will be `Infinity`. if tracking is not array-like value will be 0
-
-● `metadata.to:number`, index of tracking items on current `tracking`. If the item is just `REMOVED` the value will be Infinity. if tracking is not array-like value will be 0
-
-● `metadata.justUpdate:boolean`, Indicate phase changed just now in this cycle 
+● `metadata.justUpdate:boolean`: Indicate phase changed just now in this cycle 
 in next loop in will be `false`. It can be used to trigger something one-time 
 
 **The next property will be added just when `option.useEffect` is `true`**
 
-●  `metadata.ref`, Instance of `React.createRef`.`useAnimeManger` hold it to have a reference to Real Dom element the tracking item create. Developer should attach it to React generated component, Without that, `dx` & `dy` will be `0` constantly.
+●  `metadata.ref:REF`: Instance of `React.createRef`.`useAnimeManger` hold it to have a reference to Real Dom element the tracking item create. Developer should attach it to React generated component, Without that, `dx` & `dy` will be `0` constantly.
 
-● `metadata.dom`, A dom reference, equal to `metadata.ref.current`.
+● `metadata.dom:DOM`: A dom reference, equal to `metadata.ref.current`.
 
-● `metadata.dx:number` & `metadata.dy:number`, the distance DOM moved in `dx` on an x-axis and y-axis. `useAnimeEffect` used `options.deltaStyle` to decide the way calculate that's values.
+● `metadata.dx:number` & `metadata.dy:number`: the distance DOM moved in `dx` on an x-axis and y-axis. `useAnimeEffect` used `options.deltaStyle` to decide the way calculate that's values.
 
-● `metadata.nextPhases`, A array, when next phases will hold up until current animation done they store here
+● `metadata.nextPhases`: A array, when next phases will hold up until current animation done they store here

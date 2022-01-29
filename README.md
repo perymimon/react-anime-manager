@@ -37,7 +37,7 @@ Add a star ⭐ to the Github project if you like it.
 - [Install & use](#install--use)
 - [Examples](#examples)
     - [simple counter](#simple-counter)
-    - [Hidden Element](#hidden-element)
+    - [Hidden Element](#simple-primitive-counter)
     - [List of items](#list-of-items)
 - [API](#api)
 

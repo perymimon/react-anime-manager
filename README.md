@@ -52,7 +52,7 @@ Add the package to your project
 Then import it as hook into your component
 
 ```jsx
-import  {useAnimeManager} from `@perymimon/react-anime-manager`;
+import  {useAnimeManager} from "@perymimon/react-anime-manager";
 // function useAnimeManager(tracking, [key | option]) return array
 
 export function Users(users){
@@ -90,7 +90,7 @@ Let's create animated counter.
 `tracking` is just a simple primitive number, So the number himself used as a key for each `stateItem`.
 
 ```js codesandbox=animeManager
-import {useAnimeManager} from '@perymimon/react-anime-manager'
+import {useAnimeManager} from "@perymimon/react-anime-manager"
 
 export default function Counter({state2class, args}) {
     
@@ -154,7 +154,7 @@ Since *true* and *false* treat each as a separate item with a separate state, *u
 This approach saves to dealing with `array.map` when it is not necessary.
 
 ```jsx codesandbox=animeManager
-import {useAnimeManager} from '@perymimon/react-anime-manager'
+import {useAnimeManager} from "perymimon/react-anime-manager"
 
 export default function ShowHide({state2class, args}) {
     const [show, setShow] = useState(true);
@@ -197,7 +197,7 @@ For *ref* key it's required to follow React's documentation about how attach ref
 [ref](https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper).
 
 ```jsx codesandbox=animeManager
-import {useAnimeManager, STATIC, ADD, REMOVE, MOVE} from '@perymimon/react-anime-manager'
+import {useAnimeManager, STATIC, ADD, REMOVE, MOVE} from "@perymimon/react-anime-manager"
 
 var globalCounter = 5;
 export default function ComponentList({state2class, args}) {
@@ -245,9 +245,9 @@ That include: *PREADD*, *PRMOVE*, and *PRENEW* that assigned before recalculate 
 The *ref* key is required to follow React's documentation about [ref] (https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper).
 
 # API
-##  🖹 `useAnimeManager` ( exposed by `@perymimon/react-anime-manager` ) 
+##  🖹 `useAnimeManager` ( exposed by "@perymimon/react-anime-manager" ) 
 ```jsx
-import {useAnimeManager} from '@perymimon/react-anime-manager'
+import {useAnimeManager} from "@perymimon/react-anime-manager"
 
 itemStates = useAnimeManager( tracking [, key|{
     oneAtATime: false,

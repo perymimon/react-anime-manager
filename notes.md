@@ -55,3 +55,8 @@ fonts for a console: Consolas, "Liberation Mono", Courier, monospace
 - build: rebuild before npm publish
 - deploy story book: npm run deploy-storybook
 - 
+
+### What New
+1) option `protectFastChanges` is now `instantChange` in opposite manner
+2) hold state now save the whole previus state and use long term memory to save everything until it done
+3) useEffect already disable

@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Indie+Flower');
 
+.stage{
+    height: min-content;
+}
 
 .item{
     font-family: 'Indie Flower', sans-serif;
@@ -12,7 +15,8 @@
     font-weight: bold;
     border-radius: 0.5em;
 
-    width: 25em;
+    min-width: 10em;
+    width: max-content;
     height: 2em;
     display: grid;
     justify-content: start;

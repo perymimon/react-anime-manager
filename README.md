@@ -245,9 +245,13 @@ That include: *PREADD*, *PRMOVE*, and *PRENEW* that assigned before recalculate 
 The *ref* key is required to follow React's documentation about [ref] (https://reactjs.org/docs/forwarding-refs.html#gatsby-focus-wrapper).
 
 # API
-##  🖹 `useAnimeManager` ( exposed by "@perymimon/react-anime-manager" ) 
+##  🖹 `useAnimeManager` 
+### ( exposed by "@perymimon/react-anime-manager" )
+
 ```jsx
 import {useAnimeManager} from "@perymimon/react-anime-manager"
+//or
+import useAnimeManager from "@perymimon/react-anime-manager"
 
 itemStates = useAnimeManager( tracking [, key|{
     oneAtATime: false,

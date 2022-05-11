@@ -45,7 +45,7 @@ export function ShowHide(args) {
                 class={["item", state2class[phase]].join(' ')}
                 ref={ref}
                 onAnimationEnd={done}
-            >one InOut value:{String(flag)}</li>
+            > {String(flag)? 'in': 'out'}</li>
         }</ol>
     </div>
 }

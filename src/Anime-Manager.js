@@ -1,8 +1,9 @@
 //# inspiration from https://codesandbox.io/s/reorder-elements-with-slide-transition-and-react-hooks-flip-211f2?file=/src/AnimateBubbles.js
-import React, {useRef, useState, useEffect, useLayoutEffect, useMemo} from "react";
+import React, {createRef, useRef, useState, useEffect, useLayoutEffect, useMemo} from "react";
 import LetMap from './let-map-basic'
 
 export const STATIC = 'static', ADD = 'added', REMOVE = 'removed', MOVE = 'move';
+export const PREREMOVE = 'preremoved', PREMOVE = 'premove';
 const wmKeys = new WeakMap();
 
 function keyGenerator(item, i) {
@@ -25,12 +26,10 @@ export function usePrevious(value, initialValue, changedTracker) {
 
 export function useAppear() {
     const flag = useRef(true);
-
     useEffect(_ => {
         flag.current = false;
         return _ => flag.current = true;
     }, []);
-
     return flag.current;
 }
 
@@ -56,12 +55,13 @@ function useDebounceRender() {
 
 function useLongTimeMemory() {
     const {current: memory} = useRef(new LetMap(key =>
-        new Proxy({key, item: null, pipe: [], done: null}, proxyHandler)
+        new Proxy({key, item: null, pipe: [], done: null, ref: null, dom: null, dx: 0, dy: 0}, proxyHandler)
     ))
 
     const proxyHandler = {
         get(record, prop, receiver) {
             let exporter = (_ => {
+                if(!record) debugger
                 if (prop in record) return record[prop]
                 let state = record.pipe[0]
                 if (prop in state) return state[prop]
@@ -69,9 +69,10 @@ function useLongTimeMemory() {
 
             return typeof exporter == 'function' ?
                 exporter.bind(receiver) :
-                exporter;
+                exporter
         },
         set(record, prop, value) {
+            if(!record) debugger
             if (prop in record) {
                 record[prop] = value
                 return true
@@ -84,38 +85,44 @@ function useLongTimeMemory() {
 }
 
 export function useAnimeManager(tracking, options = {}) {
-    let {oneAtATime = !Array.isArray(tracking), useEffect, instantChange = false} = options;
+    let {oneAtATime = !Array.isArray(tracking), postEffect, onAnimationEnd, instantChange = false} = options;
 
     /** long time memory */
 
     const memory = useLongTimeMemory()
 
-    const current = useChangeIntersection(tracking, options, false);
+    const [current,currentHash] = useChangeIntersection(tracking, options, true);
     const forceRender = useDebounceRender();
 
-    useMemo((_) => {
-
+     useMemo((_) => {
         /**
          * after Intersection
          * 1) add done callback
-         * 2) hold on prev state if it is not done (it ADD or MOVE or REMOVE)
-         * 3) return also a state that not finish to REMOVE
+         * 2) add dom ref for each record
+         * 3) hold on prev state if it is not done (it ADD or MOVE or REMOVE)
+         * 4) return convert state to record ( same just with ability to pipe states )
          */
-        for (let state of current) {
-            // clean item from state
+
+        /** Create records from states */
+        for (let [key, state] of currentHash) {
+            /** Build record and add state to record pipe*/
             let {item, key} = state;
-            delete state.item
+            // clean item from state
+            delete state.item // protect from memory leak
+            delete state.key  // just clean it
             // create new entry in the long-time-memory
             let record = memory.let(key)
+
             record.item = item // update item to the most updated one
-            record.done = doneFactory(forceRender, memory)
-            if(state.phase === STATIC) continue
-            if(record.pipe[0]?.phase == STATIC)
+            record.ref ??= createRef()
+            record.done ??= doneFactory(forceRender, memory, onAnimationEnd)
+            if (state.phase === STATIC) continue
+            if (record.pipe[0]?.phase == STATIC)
                 record.pipe.shift()
             record.pipe.push(state)
+
             // check edge cases:
             // 1) merge two MOVE
-
             /// lastState.phase === state.phase are just if the phase === MOVE
             // if (lastState?.phase === state.phase) {
             //     record.pipe.pop()
@@ -123,63 +130,81 @@ export function useAnimeManager(tracking, options = {}) {
             // }
         }
 
-
-    }, [current])
-    // if (useEffect) useAnimeEffect(stateItems, options)
-    return useMemo(_ => {
-        // if it oneAtATime i will send the first record (it change when it remove)
-        if(oneAtATime){
-            for(let [key,record] of memory){
-                return record
-            }
-        }
-        let exporter = []
-        let cutInter = new Set(memory.keys())
-
-        for (let state of current) {
-            cutInter.delete(state.key)
-            exporter.push(memory.get(state.key))
-        }
-        /**  retrieve old not finish REMOVE items */
-        for (let key of cutInter) {
-            let record = memory.get(key)
-            exporter.splice(record.from, 0, record)
-        }
-        exporter = exporter.filter(Boolean)
-        /** protect from slow removed animations */
+        /** warn from slow removed animations */
         WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
+    }, [current])
 
-        return  exporter;
+    const records =useMemo(_=>{
+        let records = []
+        for (let state of current) {
+            records.push(record)
+        }
+        if (oneAtATime) {
+            for (let [key, record] of memory)
+                return [record]
+        }
+        /**
+         * 3) retrieve old not finish REMOVE items
+         */
+        for(let [key, record] of memory){
+            if ( currentHash.has(key) ) continue
+            // assuming record still in the memory but not in current
+            // mean it in  REMOVE State
+            records.splice(record.from, 0, record)
+        }
+        return records
+    },[current])
 
-    }, [memory.size])
 
+    /** calculate the move and bring the DOM */
+    useLayoutEffect(_ => {
+        for (let [key,record] of memory) {
+            let {ref: {current: dom}, from} = record
+            if (!dom) continue
+            if (!(from == Infinity)) {
+                let boxFrom = records[from].ref.current?.getBoundingClientRect()
+                let boxCurrent = dom.getBoundingClientRect()
+                record.dx = boxFrom.x - boxCurrent.x
+                record.dy = boxFrom.y - boxCurrent.y
+                // record.phase = record.phase.replace('pre', '')
+            }
+            record.dom = dom
+        }
+        // do it after calculation so callback triggered animation not disruption calculation
+        for (let record of records) {
+            postEffect?.(record)
+        }
+
+    }, [records])
+
+    return oneAtATime? records[0]: records
 }
 
-function doneFactory(forceRender, memory) {
+function doneFactory(forceRender, memory, onAnimationEnd) {
     return async function done() {
-        let state = this;
-        const {key, phase} = state;
+        let record = this;
+        const {key, phase} = record;
         if (phase == STATIC) return;
 
         if (phase === ADD || phase === MOVE) {
-            state.phase = STATIC;
-            state.from = state.to;
+            record.phase = STATIC;
+            record.from = record.to;
+            record.dx = record.dy = 0;
             await forceRender();
-            if (state.pipe.length > 1) {
-                state.pipe.shift();
+            onAnimationEnd?.(record)
+            if (record.pipe.length > 1) {
+                record.pipe.shift();
                 forceRender()
             }
             return null;
         }
         if (phase === REMOVE) {
-            state.pipe.shift()
-            if (state.pipe.length == 0) {
+            record.pipe.shift()
+            if (record.pipe.length == 0) {
                 memory.delete(key)
             }
-            return forceRender()
+            return forceRender(record)
         }
-
-
     }
 }
 
@@ -226,72 +251,6 @@ export function useChangeIntersection(tracking, options = {}, exportHash) {
         return exportOrder;
 
     }, [tracking])
-}
-
-function madeBoxesGetter(by, states, boxMap) {
-    if (by == 'byLocation') return createLocationBoxes(states);
-    if (by == 'byPosition') return timeBoxes;
-    return WARNS.bind('noDeltaStyle', by);
-
-    function timeBoxes(state) {
-        const {key, dom} = state;
-        const box = dom?.getBoundingClientRect() ?? null;
-        const prevBox = boxMap.get(key);
-        boxMap.set(key, box);
-        return {box, prevBox}
-    }
-
-    function createLocationBoxes(states) {
-        const list = [];
-        for (const state of states) list[state.to] = state;
-        delete list[Infinity]
-
-        return function locationBoxes(state) {
-            const {from, to} = state;
-            const box = list[to].dom?.getBoundingClientRect();
-            const prevBox = list[from].dom?.getBoundingClientRect()
-            return {box, prevBox}
-        }
-    }
-
-}
-
-export function useAnimeEffect(states, options = {}) {
-    const {deltaStyle = 'byPosition'} = options
-    const {current: boxMap} = useRef(new Map());
-    // todo: take forcerender as paramert so it not refresh twice
-    const forceRender = useDebounceRender();
-    const getBoxes = madeBoxesGetter(deltaStyle, states, boxMap)
-
-    useMemo((_) => states.forEach((state, i) => {
-        state.ref = React.createRef();
-        state.dx ??= 0;
-        state.dy ??= 0;
-        state.nextPhases.push(state.phase);
-        if (state.phase == MOVE) state.phase = state.prevPhase;
-        const done = state.done;
-        state.done = function () {
-            done();
-            boxMap.set(state.key, state?.dom.getBoundingClientRect());
-        }
-    }), [states, boxMap])
-
-    useLayoutEffect(function () {
-
-        for (const state of states) {
-            const {key, from, to, ref: {current: dom = null}} = state;
-            state.phase = state.nextPhases.pop();
-            state.dom = dom;
-            const {box, prevBox} = getBoxes(state)
-            if (prevBox && box) {
-                state.dx = prevBox.x - box.x;
-                state.dy = prevBox.y - box.y;
-            }
-        }
-
-        forceRender();
-
-    }, [states]);
 }
 
 function WARNS(test, code, arg0) {

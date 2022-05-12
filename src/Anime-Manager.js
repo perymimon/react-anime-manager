@@ -1,5 +1,12 @@
 //# inspiration from https://codesandbox.io/s/reorder-elements-with-slide-transition-and-react-hooks-flip-211f2?file=/src/AnimateBubbles.js
-import React, {createRef, useRef, useState, useEffect, useLayoutEffect, useMemo} from "react";
+import React, {
+    createRef,
+    useRef,
+    useState,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+} from "react";
 import LetMap from './let-map-basic'
 
 export const STATIC = 'static', ADD = 'added', REMOVE = 'removed', MOVE = 'move';
@@ -54,72 +61,65 @@ function useDebounceRender() {
 }
 
 function useLongTimeMemory() {
-    const {current: memory} = useRef(new LetMap(key =>
-        new Proxy({key, item: null, pipe: [], done: null, ref: null, dom: null, dx: 0, dy: 0}, proxyHandler)
-    ))
+    // todo: why useref can't take inti function
+    const {current: memory} = useRef(new LetMap(key => []))
 
-    const proxyHandler = {
-        get(record, prop, receiver) {
-            let exporter = (_ => {
-                if(!record) debugger
-                if (prop in record) return record[prop]
-                let state = record.pipe[0]
-                if (prop in state) return state[prop]
-            })()
-
-            return typeof exporter == 'function' ?
-                exporter.bind(receiver) :
-                exporter
-        },
-        set(record, prop, value) {
-            if(!record) debugger
-            if (prop in record) {
-                record[prop] = value
-                return true
-            }
-            record.pipe[0][prop] = value;
-            return true
+    useMemo(_ => {
+        memory.shift = function (key) {
+            let pipe = this.get(key);
+            let state = pipe.shift()
+            if (pipe.length === 0)
+                this.delete(key)
+            return state;
         }
-    }
-    return memory
+    })
+    return memory;
 }
 
 export function useAnimeManager(tracking, options = {}) {
     let {oneAtATime = !Array.isArray(tracking), postEffect, onAnimationEnd, instantChange = false} = options;
 
     /** long time memory */
-
     const memory = useLongTimeMemory()
 
-    const [current,currentHash] = useChangeIntersection(tracking, options, true);
+    const [current, currentHash] = useChangeIntersection(tracking, options, true);
     const forceRender = useDebounceRender();
 
-     useMemo((_) => {
-        /**
-         * after Intersection
-         * 1) add done callback
-         * 2) add dom ref for each record
-         * 3) hold on prev state if it is not done (it ADD or MOVE or REMOVE)
-         * 4) return convert state to record ( same just with ability to pipe states )
-         */
+    /**
+     * after Intersection
+     * 1) enrich the stats with done, ref, dx,dy, dom
+     * 2) hold on prev state if it that not done (middle of ADD, MOVE or REMOVE)
+     * 3) bring back REMOVE states that not finish and will not show in current phase ( removed before two or more updates )
+     */
 
-        /** Create records from states */
-        for (let [key, state] of currentHash) {
-            /** Build record and add state to record pipe*/
+    useMemo((_) => {
+        /** pipes state and use the current-one */
+        for (let [index, state] of current.entries()) {
+
+            /*  3.2) next tick update it to next state on the pipe */
             let {item, key} = state;
-            // clean item from state
-            delete state.item // protect from memory leak
-            delete state.key  // just clean it
-            // create new entry in the long-time-memory
-            let record = memory.let(key)
+            let pipe = null
 
-            record.item = item // update item to the most updated one
-            record.ref ??= createRef()
-            record.done ??= doneFactory(forceRender, memory, onAnimationEnd)
-            if (state.phase === STATIC) continue
-            if (record.pipe[0]?.phase == STATIC)
-                record.pipe.shift()
-            record.pipe.push(state)
+            /** 2) if current state not static store it*/
+            if (state.phase != STATIC) {
+                pipe = memory.let(key)
+                pipe.push(state)
+                delete state.item
+                delete state.key
+            }
+            /** 1) if long-memory has entry it means prev animation not done. so return it */
+            // also if state === static use long-memory if exist
+            if (memory.has(key)) {
+                pipe = memory.get(key)
+                state = current[index] = pipe[0]
+            }
+
+            state.item = item;
+            state.key = key;
+            state.ref ??= createRef()
+            /** 3.1) when done accure update state to static.*/
+            state.done ??= done.bind(state, memory, current, forceRender, onAnimationEnd)
+            state.dx = state.dy = 0
 
             // check edge cases:
             // 1) merge two MOVE
@@ -130,83 +130,65 @@ export function useAnimeManager(tracking, options = {}) {
             // }
         }
 
+        /** 3) retrieve "old" not finish REMOVE states */
+        for (let [key, pipe] of memory) {
+            if (currentHash.has(key)) continue
+            let state = pipe[0]
+            // assuming REMOVE State
+            current.splice(state.from, 0, state)
+        }
+
         /** warn from slow removed animations */
         WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
     }, [current])
 
-    const records =useMemo(_=>{
-        let records = []
-        for (let state of current) {
-            records.push(record)
-        }
-        if (oneAtATime) {
-            for (let [key, record] of memory)
-                return [record]
-        }
-        /**
-         * 3) retrieve old not finish REMOVE items
-         */
-        for(let [key, record] of memory){
-            if ( currentHash.has(key) ) continue
-            // assuming record still in the memory but not in current
-            // mean it in  REMOVE State
-            records.splice(record.from, 0, record)
-        }
-        return records
-    },[current])
-
-
-    /** calculate the move and bring the DOM */
     useLayoutEffect(_ => {
-        for (let [key,record] of memory) {
-            let {ref: {current: dom}, from} = record
+        /** calculate the move and bring the DOM */
+        for (let state of current) {
+            let {ref: {current: dom}, from, to,phase} = state
             if (!dom) continue
-            if (!(from == Infinity)) {
-                let boxFrom = records[from].ref.current?.getBoundingClientRect()
-                let boxCurrent = dom.getBoundingClientRect()
-                record.dx = boxFrom.x - boxCurrent.x
-                record.dy = boxFrom.y - boxCurrent.y
-                // record.phase = record.phase.replace('pre', '')
+            state.dom = dom
+            if (phase === MOVE) {
+                let boxFrom = current[from].ref.current?.getBoundingClientRect()
+                let boxCurrent = current[to].ref.current?.getBoundingClientRect()
+                state.dx = boxFrom.x - boxCurrent.x
+                state.dy = boxFrom.y - boxCurrent.y
             }
-            record.dom = dom
         }
-        // do it after calculation so callback triggered animation not disruption calculation
-        for (let record of records) {
-            postEffect?.(record)
+        // do callback after calculation so triggered it not disruption calculation
+        for (let state of current) {
+            postEffect?.(state)
         }
+    }, [current])
 
-    }, [records])
-
-    return oneAtATime? records[0]: records
+    return (oneAtATime)? current[0]: current
 }
 
-function doneFactory(forceRender, memory, onAnimationEnd) {
-    return async function done() {
-        let record = this;
-        const {key, phase} = record;
-        if (phase == STATIC) return;
+async function done(memory, current, forceRender, onAnimationEnd) {
+    const state = this;
+    let {key, phase} = state;
+    if (phase == STATIC) return;
+    let index;
+    if (phase === ADD || phase === MOVE) {
+        state.phase = STATIC;
+        state.from = state.to;
+        state.dx = state.dy = 0;
 
-        if (phase === ADD || phase === MOVE) {
-            record.phase = STATIC;
-            record.from = record.to;
-            record.dx = record.dy = 0;
-            await forceRender();
-            onAnimationEnd?.(record)
-            if (record.pipe.length > 1) {
-                record.pipe.shift();
-                forceRender()
-            }
-            return null;
-        }
-        if (phase === REMOVE) {
-            record.pipe.shift()
-            if (record.pipe.length == 0) {
-                memory.delete(key)
-            }
-            return forceRender(record)
-        }
+    } else if (phase === REMOVE) {
+        index = current.findIndex(s => s.key == key)
+        current.splice(index, 1)
     }
+    memory.shift(key)
+    await onAnimationEnd?.(state)
+    await forceRender()
+    if (memory.has(key)) {
+        Object.assign(state, memory.shift(key))
+        if (phase === REMOVE) current.splice(index, 0, state)
+        await forceRender()
+    }
+
 }
+
 
 /** just use the key on two runs of the running component ( with different array reference )
  to find which item added or removed */
@@ -242,7 +224,7 @@ export function useChangeIntersection(tracking, options = {}, exportHash) {
             let phase = state ? (i === state.to) ? STATIC : MOVE : REMOVE;
 
             if (phase === REMOVE) {
-                state = {key: k, from: i, to: Infinity, item, phase}
+                state = {item, key: k, phase, from: i, to: Infinity,}
                 exportOrder.splice(i, 0, state)
                 hashMap.set(k, state)
             } else Object.assign(state, {from: i, phase})

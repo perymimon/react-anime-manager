@@ -72,15 +72,24 @@ function useLongTimeMemory() {
                 this.delete(key)
             return state;
         }
-    })
+        memory.push = function (key, state) {
+            let pipe = memory.let(key)
+            pipe.push(state)
+        }
+        memory.peek = function (key, state){
+            let pipe = memory.get(key) || []
+            return pipe[0] || state
+        }
+    },[])
     return memory;
 }
 
 export function useAnimeManager(tracking, options = {}) {
-    let {oneAtATime = !Array.isArray(tracking), postEffect, onAnimationEnd, instantChange = false} = options;
+    let {oneAtATime = !Array.isArray(tracking), onEffect, onAnimationEnd, instantChange = false} = options;
 
     /** long time memory */
     const memory = useLongTimeMemory()
+    const {current: referenceMemory} = useRef(new LetMap(key => createRef()))
 
     const [current, currentHash] = useChangeIntersection(tracking, options, true);
     const forceRender = useDebounceRender();
@@ -98,28 +107,27 @@ export function useAnimeManager(tracking, options = {}) {
 
             /*  3.2) next tick update it to next state on the pipe */
             let {item, key} = state;
+            delete state.item
+            delete state.key
             let pipe = null
 
             /** 2) if current state not static store it*/
             if (state.phase != STATIC) {
-                pipe = memory.let(key)
-                pipe.push(state)
-                delete state.item
-                delete state.key
+                memory.push(key, state)
             }
             /** 1) if long-memory has entry it means prev animation not done. so return it */
             // also if state === static use long-memory if exist
-            if (memory.has(key)) {
-                pipe = memory.get(key)
-                state = current[index] = pipe[0]
-            }
+            // pull out phase that still in action
+            state = memory.peek(key,state)
 
+            state = current[index] = Object.create(state)
+            state.ref = referenceMemory.let(key)
             state.item = item;
             state.key = key;
-            state.ref ??= createRef()
+
             /** 3.1) when done accure update state to static.*/
             state.done ??= done.bind(state, memory, current, forceRender, onAnimationEnd)
-            state.dx = state.dy = 0
+            state.dx = state.dy = state.abs_dx = state.abs_dy = 0
 
             // check edge cases:
             // 1) merge two MOVE
@@ -142,26 +150,49 @@ export function useAnimeManager(tracking, options = {}) {
         WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
     }, [current])
 
-    useLayoutEffect(_ => {
-        /** calculate the move and bring the DOM */
+    usePostEffect(current, onEffect)
+
+    return (oneAtATime) ? current[0] : current
+}
+
+function usePostEffect(current, onEffect) {
+    const {current: positionMemory} = useRef(new Map())
+    useMemo(_ => {
         for (let state of current) {
-            let {ref: {current: dom}, from, to,phase} = state
-            if (!dom) continue
+            const {key, phase, ref: {current: dom}} = state;
+            if (phase === ADD) continue
+            positionMemory.set(key, dom?.getBoundingClientRect())
+        }
+    }, [current])
+
+    useLayoutEffect(_ => {
+        for (let state of current) {
+            let {ref: {current: dom}, from, to, phase, key} = state
+
             state.dom = dom
-            if (phase === MOVE) {
-                let boxFrom = current[from].ref.current?.getBoundingClientRect()
-                let boxCurrent = current[to].ref.current?.getBoundingClientRect()
-                state.dx = boxFrom.x - boxCurrent.x
-                state.dy = boxFrom.y - boxCurrent.y
+            if (!dom) continue
+
+            calculateDiffTransform:{
+                if (state.phase === ADD) break calculateDiffTransform
+                let boxFrom = positionMemory.get(key)
+                let boxCurrent = dom?.getBoundingClientRect()
+                state.trans_dx = boxFrom.x - boxCurrent.x
+                state.trans_dy = boxFrom.y - boxCurrent.y
+            }
+            calculateDiffFromTo:{
+                if (phase === MOVE) {
+                    let boxFrom = current[from].ref.current?.getBoundingClientRect()
+                    let boxCurrent = current[to].ref.current?.getBoundingClientRect()
+                    state.dx = boxFrom.x - boxCurrent.x
+                    state.dy = boxFrom.y - boxCurrent.y
+                }
             }
         }
         // do callback after calculation so triggered it not disruption calculation
         for (let state of current) {
-            postEffect?.(state)
+            onEffect?.(state)
         }
     }, [current])
-
-    return (oneAtATime)? current[0]: current
 }
 
 async function done(memory, current, forceRender, onAnimationEnd) {

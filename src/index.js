@@ -1,1 +1,1 @@
-export * as AnimeManager from './Anime-Manager'
+export * as AnimeManager from './anime-manager'

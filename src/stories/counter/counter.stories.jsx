@@ -1,5 +1,5 @@
-import {useAnimeManager, MOVE,
-    ADD, REMOVE, STATIC, PREREMOVE} from "../../Anime-Manager";
+import {useAnimeManager, SWAP,
+    ADD, REMOVE, STATIC, PREREMOVE} from "../../anime-manager";
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import './counter.css'
@@ -25,7 +25,7 @@ const state2class = {
     [REMOVE]: "xyz-out xyz-absolute",
     [PREREMOVE]: "xyz-absolute",
     [REMOVE]: "xyz-out xyz-absolute",
-    [MOVE]: "xyz-in",
+    [SWAP]: "xyz-in",
     [STATIC]: ''
 }
 

@@ -1,4 +1,4 @@
-import {useAnimeManager, useAnimeEffect, MOVE, useAppear, ADD, REMOVE, STATIC, PREREMOVE} from "../../Anime-Manager";
+import {useAnimeManager, useAnimeEffect, SWAP, useAppear, ADD, REMOVE, STATIC, PREREMOVE} from "../../anime-manager";
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import '../stories-style.css'
@@ -22,7 +22,7 @@ const state2class = {
     [REMOVE]: "xyz-out xyz-absolute",
     [PREREMOVE]: "xyz-absolute",
     [REMOVE]: "xyz-out xyz-absolute",
-    [MOVE]: "xyz-in",
+    [SWAP]: "xyz-in",
     [STATIC]: ''
 }
 

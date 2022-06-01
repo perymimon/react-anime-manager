@@ -160,7 +160,7 @@ export function List2AbsMove({list}) {
 
 }
 
-export function List2MetaAbsMove({list}) {
+export function List2MetaMove({list}) {
     const [internalList, setList] = useState(list)
     const counterRef = useRef(list.length)
     const items = useAnimeManager(internalList, {onEffect, onAnimationEnd});
@@ -168,7 +168,7 @@ export function List2MetaAbsMove({list}) {
     function onEffect({dom, phase, meta_dx, meta_dy}) {
         const state2class = {
             [ADD]: "xyz-appear",
-            [REMOVE]: "xyz-out",
+            [REMOVE]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
         }

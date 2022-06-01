@@ -43,10 +43,8 @@ export function useAppear() {
 function useDebounceRender() {
     const {current: resolvers} = useRef([]);
     const [cacheBuster, forceRender] = useState([]);
-
     useEffect(_ => {
-        for (let res of resolvers)
-            res()
+        for (let res of resolvers) res()
         resolvers.length = 0;
     })
 
@@ -66,7 +64,7 @@ function useLongTimeMemory() {
     const {current: memory} = useRef(new LetMap(key => ({
         item: null,
         pipe: [],
-        key:key
+        key: key
     })))
 
     useMemo(_ => {
@@ -77,18 +75,17 @@ function useLongTimeMemory() {
                 this.delete(key)
             // return Object.assign(state, {item, key})
         }
-        memory.push = function (key, state) {
-            let record = memory.let(key)
+        memory.push = function (k, state) {
+            let record = memory.let(k)
             record.item = state.item;
-            delete state.item;
-            delete state.key;
-            record.pipe.push(state)
+            let {item, key, ...rest} = state
+            record.pipe.push(rest)
+            // dense(record.pipe)
         }
         memory.peek = function (key) {
             if (!this.has(key)) return null;
             let record = memory.get(key)
-            let {pipe} = memory.get(key)
-            return Object.assign(record, pipe[0])
+            return Object.assign(record, record.pipe[0])
         }
     }, [])
 
@@ -108,16 +105,11 @@ function test(name, tracking, options = {}) {
 
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
-    const {current: defaults} = useRef({
-        oneAtATime: !Array.isArray(tracking)
-    })
-    let {oneAtATime = defaults.oneAtATime, onEffect, onAnimationEnd, instantChange = false} = options;
-    /** long time memory */
+    const defaults = useMemo(_ => ({oneAtATime: !Array.isArray(tracking)}), [])
+    const {oneAtATime, onEffect, onAnimationEnd, instantChange = false} = {...defaults, ...options};
     const memory = useLongTimeMemory()
-    const {current: refMemory} = useRef(new LetMap(key => createRef()))
-
-    options.exportHash = true;
-    const [intersection, currentHash] = useChangeIntersection(tracking, options);
+    options.exportHash = false;
+    const intersection = useChangeIntersection(tracking, options);
     const [forceRender, cacheBuster] = useDebounceRender();
 
     /**
@@ -126,93 +118,77 @@ export function useAnimeManager(tracking = [], options = {}) {
      * 2) hold on prev state if it that not done (middle of ADD, MOVE or REMOVE)
      * 3) bring back REMOVE states that not finish and will not show in current phase ( removed before two or more updates )
      */
-    function enrichState(state) {
-        state.ref = refMemory.let(state.key)
-        state.done ??= done.bind(state, memory, intersection, forceRender, onAnimationEnd, refMemory)
-        state.dx ??= state.dy ??= state.abs_dx ??= state.abs_dy ??= state.meta_dx ??= state.meta_dy ??= 0
-        return state
-    }
-
     useMemo(function retrieveStats() {
         /** pipes state and use the current-one
          /** 1) if current state not static store it
          /** 2) if long-memory has entry it means prev animation not done. so return it
-         /** 3.1) when done accure update state to static.
+         /** 3.1) when done accuse update state to static.
          /** 3.2) next tick update it to next state on the pipe */
-
-        for (let [index, state] of intersection.entries()) {
-            let {item, key, phase} = state;
-            /** (1) */
-            if (state.phase !== STATIC) {
-                memory.push(key, state)
-            }
-            /** (2) memory.peek */
-            // pull out phase that still in action
-            state = memory.peek(key) || state;
-            intersection[index] = enrichState(state);
-            // current.splice(index,1)
-            // current.splice(state.to, 0, state)
+        for (let state of intersection) {
+            if (state.phase !== STATIC)
+                memory.push(state.key, state)
         }
-
-        /** 3) retrieve "old" not finish REMOVE states */
-        //q: can be situation that REMOVE come before ADD so key will be in the `current` there is risk for dupliate
-        //a: if ADD is in the current it will be replaced by REMOVE on the main loop
-        for (let [key, record] of memory) {
-            if (currentHash.has(key)) continue
-            let state = memory.peek(key);
-            // assuming REMOVE State
-            intersection.splice(state.from, 0, enrichState(state))
-        }
-
-        /** warn from slow removed animations */
-        WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
     }, [intersection])
 
-    // to calculate the real check between the result array dev user see between each loop
-    // take into accout the real position of the items in the expoter array. after adding back
-    // removed items, and accumulate adding items that not finish there animation but push each other
-    // on returning array ( so it we render them they MOVED )
-    // todo: how to make this hook recalcaulte just when current change, maybe internaly, without make other hook rerender
-    // todo: with part of the result we need to use: just from-to? real-from [real-to == index]
-    // todo: we not need removed items back as they result of user done()
+    const metaItems = useMemo(function rebuild() {
+        const meta = []
+        for (let k of memory.keys()) {
+            let state = memory.peek(k)
+            state.done = done.bind(state, memory, meta, forceRender, onAnimationEnd)
+            meta.push(state)
+        }
+        meta.sort((a, b) => {
+            let cmp = a.to - b.to || a.from - b.from
+            if (cmp != 0) return cmp;
+            if (a.phase == b.phase) return 0;
+            if (a.phase == REMOVE) return -1;
+            if (b.phase == REMOVE) return 1;
+            return 0
+        })
+        /** warn from slow removed animations */
+        WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
+        return meta
+    }, [cacheBuster, intersection])
 
-
-    useMotion(intersection, onEffect, cacheBuster)
-
-    return (oneAtATime) ? intersection[0] : intersection
+    useMotion(metaItems, onEffect, cacheBuster)
+    return (oneAtATime) ? metaItems[0] : metaItems
 }
 
-function useMotion(current, onMotion, cacheBuster) {
+function useMotion(intersection, onMotion) {
     const {current: positionMemory} = useRef(new Map())
 
-    for (let [i, state] of current.entries()) {
+    let compensation = 0
+    for (let [i, state] of intersection.entries()) {
         state.meta_from ??= i
-        state.meta_to = i
+        state.meta_to = i - compensation
+        if (state.phase == REMOVE) compensation++
     }
 
     useMemo(_ => {
-        for (let state of current) {
+        for (let [index, state] of intersection.entries()) {
+            state.dx ??= state.dy ??= state.abs_dx ??= state.abs_dy ??= state.meta_dx ??= state.meta_dy ??= 0
+            state.ref ??= createRef()
             try {
-                const {key, phase, ref: {current: dom}, meta_to} = state;
+                const {phase, ref: {current: dom}} = state;
                 if (phase === ADD) continue
                 const {offsetLeft, offsetTop} = dom ?? {};
-                positionMemory.set(meta_to, {offsetLeft, offsetTop})
+                positionMemory.set(index, {offsetLeft, offsetTop})
             } catch (e) {
                 console.log('the next error in the state', state)
                 console.error(e)
             }
         }
-    }, [current])
+    }, [intersection])
 
     useLayoutEffect(_ => {
-        const locationCache = new LetMap(index=>{
-            let dom = current[index].ref.current
+        const locationCache = new LetMap(index => {
+            let dom = intersection[index].ref.current
             const {offsetLeft, offsetTop} = dom ?? {};
             return {offsetLeft, offsetTop}
         })
 
-        for (let [i, state] of current.entries()) {
-            let {ref: {current: dom}, from, to, phase, key, meta_to} = state
+        for (let [i, state] of intersection.entries()) {
+            let {ref: {current: dom}, from, to, phase} = state
             state.dom = dom
             if (!dom) continue
             calculateVanillaTransform:{
@@ -223,30 +199,27 @@ function useMotion(current, onMotion, cacheBuster) {
                 state.trans_dy = topFrom - topTo;
             }
             calculateStrictTransform:{
-                if (phase === SWAP) {
-                    let {offsetLeft: leftFrom, offsetTop: topFrom} = locationCache.let(from);
-                    let {offsetLeft: leftTo, offsetTop: topTo} = locationCache.let(to);
-                    state.dx = leftFrom - leftTo;
-                    state.dy = topFrom - topTo;
-                }
+                if (phase !== SWAP) break calculateStrictTransform
+                let [posFrom, posTo] = [from, to].map(i => locationCache.let(i))
+                state.dx = posFrom.offsetLeft - posTo.offsetLeft;
+                state.dy = posFrom.offsetTop - posTo.offsetTop;
             }
             calculateMetaDiff:{
                 const {meta_from, meta_to} = state
-                let {offsetLeft: leftFrom, offsetTop: topFrom} = locationCache.let(meta_from);
-                let {offsetLeft: leftTo, offsetTop: topTo} = locationCache.let(meta_to);
-                state.meta_dx = leftFrom - leftTo;
-                state.meta_dy = topFrom - topTo;
+                let [posFrom, posTo] = [meta_from, meta_to].map(i => locationCache.let(i))
+                state.meta_dx = posFrom.offsetLeft - posTo.offsetLeft;
+                state.meta_dy = posFrom.offsetTop - posTo.offsetTop;
             }
         }
         // do callback after calculation so triggered it not disruption calculation
-        for (let state of current) {
+        for (let state of intersection) {
             onMotion?.(state)
         }
-    }, [current])
+    }, [intersection])
     // because it runs on different timing
 }
 
-async function done(memory, current, forceRender, onAnimationEnd, refMemory) {
+async function done(memory, intersection, forceRender, onAnimationEnd) {
     const state = this;
     let {key, phase} = state;
     if (phase == STATIC) return;
@@ -257,25 +230,20 @@ async function done(memory, current, forceRender, onAnimationEnd, refMemory) {
         state.from = state.to;
         state.meta_from = state.meta_to;
     } else if (phase === REMOVE) {
-        index = current.findIndex(s => s.key == key)
-        current.splice(index, 1)
-        refMemory.delete(key)
+        index = intersection.findIndex(s => s.key == key)
+        intersection.splice(index, 1)
     }
     memory.shift(key)
     await onAnimationEnd?.(state)
     await forceRender()
-    if (memory.has(key)) {
-        index = Math.max(index, state.from)
-        Object.assign(state, memory.peek(key))
-        if (phase === REMOVE) current.splice(index, 0, state)
-        await forceRender()
-    }
 }
 
 /** just use the key on two runs of the running component ( with different array reference )
  to find which item added or removed */
+const ver = Symbol('ver')
+let counter = 0;
+
 export function useChangeIntersection(tracking, options = {}, postProcessing) {
-    //todo: change phase MOVE to SWAP
     let {key, withRemoved = true, cacheBuster, exportHash} = options;
     key = key ?? options /*options consider as string*/;
     const current = [tracking].flat(1) // convert tracking to array
@@ -292,13 +260,14 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
 
     return useMemo(_ => {
         const hashMap = new Map()
-        const exportOrder = []
+        const intersection = []
+        intersection[ver] = ++counter;
         // register current items and assume they ADD
         for (let [i, item] of current.entries()) {
             let k = getKey(item, i);
             let state = {item, key: k, phase: ADD, from: i, to: i}
             hashMap.set(k, state)
-            exportOrder.push(state)
+            intersection.push(state)
         }
         // register previous items,compare location to understand if they Removed,Static, Move
         for (let [beforeIndex, item] of before.entries()) {
@@ -309,14 +278,14 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
             if (phase === REMOVE) {
                 if (!withRemoved) continue
                 state = {item, key: k, phase, from: beforeIndex, to: beforeIndex,}
-                exportOrder.splice(beforeIndex, 0, state)
+                intersection.splice(beforeIndex, 0, state)
                 hashMap.set(k, state)
             } else Object.assign(state, {from: beforeIndex, phase})
         }
-        if (exportHash) return [exportOrder, hashMap]
-        /** run postProcessing if it not return something return exportOrder array */
-        return postProcessing?.(exportOrder) ?? exportOrder
-        // return exportOrder;
+        if (exportHash) return [intersection, hashMap]
+        /** run postProcessing if it not return something return intersection array */
+        return postProcessing?.(intersection) ?? intersection
+        // return intersection;
 
     }, [cacheBuster, tracking])
 }

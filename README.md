@@ -25,10 +25,10 @@ import  {useAnimeManager} from "@perymimon/react-anime-manager";
 
 ## 💻 simple classic list
 
-Let's create list with add and remove methods.
+Let's create list with add and remove methods and use the external css lib `animexyz` to add animation when new item added and when some item removed from the list
 
-`states` store the metadata and used to create the returns JSX.     
-`tracking` is array of primitive numbers, In this case the number himself used as tracking key for each `state`.
+`states` store the metadata and used to create the JSX.     
+`tracking` is our items and in this case it Array of primitive numbers, so each number himself used as tracking key identifier each `state`.
 
 ```js codesandbox=animeManager
 import {useAnimeManager} from "@perymimon/react-anime-manager"

@@ -106,7 +106,7 @@ function test(name, tracking, options = {}) {
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
     const defaults = useMemo(_ => ({oneAtATime: !Array.isArray(tracking)}), [])
-    const {oneAtATime, onEffect, onAnimationEnd, instantChange = false} = {...defaults, ...options};
+    const {oneAtATime, onEffect, onDone, instantChange = false} = {...defaults, ...options};
     const memory = useLongTimeMemory()
     options.exportHash = false;
     const intersection = useChangeIntersection(tracking, options);
@@ -122,7 +122,7 @@ export function useAnimeManager(tracking = [], options = {}) {
     const metaItems = useMemo(function rebuild() {
         const meta = [...memory.values()]
         for (let record of meta) {
-            record.done = done.bind(record, memory, forceRender, onAnimationEnd)
+            record.done = done.bind(record, memory, forceRender, onDone)
         }
         let needResort;
         do {
@@ -158,7 +158,7 @@ export function useAnimeManager(tracking = [], options = {}) {
     return (oneAtATime) ? metaItems[0] : metaItems
 }
 
-async function done(memory, forceRender, onAnimationEnd) {
+async function done(memory, forceRender, onDone) {
     const record = this;
     let {key, phase} = record;
     if (phase == STATIC) return;
@@ -172,7 +172,7 @@ async function done(memory, forceRender, onAnimationEnd) {
     }
     record.pipe.shift()
     await forceRender()
-    await onAnimationEnd?.(record)
+    await onDone?.(record)
     if (record.pipe.length > 0) {
         memory.assign(record)
         memory.set(key, record)

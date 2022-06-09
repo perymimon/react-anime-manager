@@ -72,12 +72,19 @@ options = {
     // imediatly return last phase for each item acording to last tracking compare, without waiting finish
     // perviues phases animation
     instantChange : false,
+    // call each time done call from item with phase diffrent then 'static' 
+    onDone: null || function(state),
+    // call imidaitaly after trasfom state calculated, dx,dy,trans_dx,trans_dy,meta_dx,meta_dy 
+    onMotion: null || function(state),
+    // working in progress
+    restartOnUnmount: true,
+     
 }
 
 ```
 
 ### State in States
-The result of whole calculation. array with metadata knowledge for each item on tracking array that not removed and done yes
+The result of whole calculation is array with metadata for each item was on tracking array that not removed + done yes
 ```javascript
 states[{
     //Original item that metadata refers to on the `tracking` parameter.

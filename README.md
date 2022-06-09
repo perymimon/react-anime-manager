@@ -3,7 +3,7 @@ Rewrite from bottom up with abilities already by default to handle fast changes 
 
 # Getting Started
 ## What is React-Animation-Manger
-React-Anime-Manager is a hook approach for React that stabilize fast-rate of data changes and bring metadata of the changes to developer, so he has a chance to made appropriate animation on each item according to the phase of the change.
+React-Anime-Manager is a hook approach for React that stabilize fast-rate of data changes and bring metadata of the changes to developer, so he has a chance to made appropriate animation on each item on that data according to the phase of the change ( added, removed, swap ).
 
 ## Features
 * ☔ Simple to use and understand
@@ -34,20 +34,20 @@ Let's create animated-counter.
 import {useAnimeManager} from "@perymimon/react-anime-manager"
 
 export default function Counter({state2class, args}) {
-  const [count, setCounter] = useState(1)
-  const states = useAnimeManager(count)
+    const [count, setCounter] = useState(1)
+    const states = useAnimeManager(count)
 
-  useEffect(_ => {
-      setTimeout(_ => {
-          setCounter(count + 1);
-      }, 2000)
-  }, [count])
+    useEffect(_ => {
+        setTimeout(_ => {
+            setCounter(count + 1);
+        }, 2000)
+    }, [count])
 
-  return states.map(({item: number, key, phase, done}) => (
-      <div key={key} 
-           className={"item " + state2class[phase]}
-           onAnimationEnd={done}>{number}</div>
-  ))
+    return states.map(({item: number, key, phase, done}) => (
+        <div key={key}
+             className={"item " + state2class[phase]}
+             onAnimationEnd={done}>{number}</div>
+    ))
 
 }
 ```
@@ -66,7 +66,12 @@ options = {
     instantChange : false,
 }
 ```
-● `tracking`: Can be Object, primitive, or array-like of objects.  
+```javascript
+tracking`: Can be Object, primitive, or array-like of objects.
+```
+
+
+`Object: {name:'foo',id:1}`
 `Primitive: true/false 0/1/2/3 "foo" | "bar"`  
 `Array of objects:[{name:'foo',id:1},{name:'bar',id:2}]`
 
@@ -84,35 +89,51 @@ options = {
 ● `options.oneAtATime:boolean` default depend on the first tracking that go into the hook. if it array default is false, if not value is true;
 that control if retunts metadata will be arrayed or object of the first (oldest) tracking item.
 
-### key of each item in metadata array
-
-● `state.item` Original item that metadata refers to on the `tracking` parameter.
-
-● `state.key` Key actually used to identify the item. It can be the value of `key` identifier or the item himself depending on the circumstances/
-it can used as `key` argument on the JSX element. so will be correlation between item key to React component key.
-
-● `state.phase`, A enum string, indicate the item's phases:
-* `STATIC` - set when nothing changed from last time tracking update
-* `ADDED` - set when it is the first time item shown on the tracking parameters, after `done()` called the phase change to `STATIC`
-* `SWAP` - set when `item` appear in diffrent location on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`.
-* `REMOVED` - `item` are no longer on the `tracking` parameter.  after `done()` it removed completely from metadata array
-
-●  `state.done()`: Callback function that must call every time developer finish deal with current phase. so it can be jumped to next phase.
-
-●  `state.from`: where item was in previous tracking array. if phase is ADDED the value will be same as `metadata.to`
-
-● `state.to`: where item on current tracking array. If phases is REMOVED the value will be same as `metadata.from`
-
-● `state.meta_from`: where item was in previous metadata array
-
-● `metadata.meta_to`: where item on current metadata array
-
-● `metadata.ref`: Instance of `React.createRef`.`useAnimeManger` hold it to have a reference to Real Dom element the tracking item create. Developer should attach it to React generated component, Without that, `dx` & `dy` will be `0` constantly.
-
-● `metadata.dom`: A dom reference, equal to `metadata.ref.current`.
-
-For next variables if ref == dom they calculated otherwise they equal to :0
-● `metadata.{trans_dx:number,trans_dy:number}`: `trans_dx`&`trans_dy` hold the distance that relevant dom moved between previous render and current one. that variables updated after `React.useEffect` and developer can read them immediately after that on callback `oneffect(state)`
-
-● `metadata.{dx:number,dy:number}`: same as above but calculate the distance between dom on
-tracking array as position `metadata.from` and `metadata.to`
+### each state in states
+```javascript
+states[{
+    //Original item that metadata refers to on the `tracking` parameter.
+    item: user,
+    // the Key actually used to identify the item. It can be the value of item[key] identifier or the item himself depending on the circumstances/
+    // tip: key can used as `key` argument on the JSX array elements. 
+    key: '10342',
+    // A enum string, indicate the item's phases:
+    // * `STATIC` - set when nothing changed from last time tracking update
+    // * `ADDED` - set when is the first time item shown on the tracking parameters, after `done()` called the phase change to `STATIC`
+    // * `SWAP` - set when `item` appear in different location on the array (e.g: moved from index 3 to index 4).  After calling `done()` the phase change to `STATIC`.
+    // * `REMOVED` - `item` are no longer on the `tracking` parameter.  after `done()` it removed completely from metadata array    
+    phase:ADD,
+    // Callback that must call every time developer finish deal with current phase. so hook can be process to next phase.
+    done(),
+    // item's index in previous tracking array. when phase ADDED the value will be same as `.to`
+    from:0,
+    // item's index on current tracking array. when phases REMOVED the value will be same as `.from`
+    to:1,
+    // item's index in previous result of `useAnimeManager`, if phase are ADDED value will be the current index
+    meta_from:1,
+    // items's index on current result of `useAnimeManager
+    meta_to:2,
+    // Instance of `React.createRef`. should be used by the developer, and attached to jsx `.item`'s componenet genereted 
+    // Without that, `dx,dy,meta_dx,meta_dy,trans_dx,trans_dy` will be `0` constantly.
+    ref: [internal React.createRef],
+    // A dom reference, equal to `.ref.current`. affter ADDED phase it should be exist contantyly 
+    dom: [browser DOM] || null,
+    
+    // Next variables will be 0 unless dom == [browser DOM]
+    
+    // return the distance dom moved between previous render and current one. that variables updated after 
+    // `useEffect` and developer can read them immediately on callback `oneffect(state)`
+    trans_dx:0,
+    trans_dy:-43,
+    // same as above but calculate the distance between dom on `stats[from].dom` and `state[to].dom`
+    // mean, the distance between elemets, without take in effect the real coordianation of current dom, unless it same as `to`
+    dx:0,
+    dy:-43,
+    //same as dx,dy but used meta_to & meta_from to get the dom. meta_to is the current item index on the `useAnimeManager` result
+    // so basicaly it the distance from start position and the current one of that item 
+    meta_dx: 0,
+    meta_dy: -43
+    
+    
+}]
+```

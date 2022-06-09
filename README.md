@@ -69,7 +69,8 @@ options = {
     // `useAnimeManager(tracking, 'id')`
     // `useAnimeManager(tracking, {key:'id'})`
     key:'id',
-    // imediatly return last phase for each item acording to last tracking compare, without waiting finish perviues phases animation
+    // imediatly return last phase for each item acording to last tracking compare, without waiting finish
+    // perviues phases animation
     instantChange : false,
 }
 

@@ -58,38 +58,25 @@ For more examples click [here]()
 ```jsx
 import useAnimeManager from "@perymimon/react-anime-manager"
 
-metadata = useAnimeManager( tracking [,key|options])
+// tracking` can be Object, primitive, or array-like of objects.
+states = useAnimeManager( tracking [,key|options])
 
 options = {
+    // case-sensitive string represented object's key-name that can identify each item of the tracking array. `key` can 
+    // be set literal at the second parameter or,if object is provide, inside the object options. `key` used when
+    // tracking is object or array of objects. If tracking is primitive that parameter is not mandatory and the actual
+    // value of the primitive can be used as the key.
+    // `useAnimeManager(tracking, 'id')`
+    // `useAnimeManager(tracking, {key:'id'})`
     key:undefined,
-    oneAtATime:  !Array.isArray(tracking),
+
     instantChange : false,
 }
-```
-```javascript
-tracking`: Can be Object, primitive, or array-like of objects.
+
 ```
 
-
-`Object: {name:'foo',id:1}`
-`Primitive: true/false 0/1/2/3 "foo" | "bar"`  
-`Array of objects:[{name:'foo',id:1},{name:'bar',id:2}]`
-
-● `key`: case-sensitive string represented object's key-name that can identify each item of the tracking array. `key` can be set literal at the second parameter or,if object is provide, inside the object options. `key` used when tracking is object or array of objects. If tracking is primitive that parameter is not mandatory and the actual value of the primitive can be used as the key.
-
-`useAnimeManager(tracking, 'id')`  
-`useAnimeManager(tracking, {key:'id'})`
-
-● `metadata`: the result of whole calculation. return array with metadata knowledge for each item on tracking array as describe [here](/#ItemState instance)
-
-### Options object config
-● `options.key`: as `key` above
-
-**depraced**
-● `options.oneAtATime:boolean` default depend on the first tracking that go into the hook. if it array default is false, if not value is true;
-that control if retunts metadata will be arrayed or object of the first (oldest) tracking item.
-
-### each state in states
+### State in States
+The result of whole calculation. array with metadata knowledge for each item on tracking array that not removed and done yes
 ```javascript
 states[{
     //Original item that metadata refers to on the `tracking` parameter.

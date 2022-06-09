@@ -62,14 +62,14 @@ import useAnimeManager from "@perymimon/react-anime-manager"
 states = useAnimeManager( tracking [,key|options])
 
 options = {
-    // case-sensitive string represented object's key-name that can identify each item of the tracking array. `key` can 
-    // be set literal at the second parameter or,if object is provide, inside the object options. `key` used when
-    // tracking is object or array of objects. If tracking is primitive that parameter is not mandatory and the actual
-    // value of the primitive can be used as the key.
+    // case-sensitive string represented object's key-name that can identify each item of the tracking array.
+    // `key` can be set literal at the second parameter or,if object is provide, inside the object options.
+    // `key` used when tracking is object or array of objects. If tracking is primitive that parameter is not
+    //  mandatory and the actual value of the primitive can be used as the key.
     // `useAnimeManager(tracking, 'id')`
     // `useAnimeManager(tracking, {key:'id'})`
-    key:undefined,
-
+    key:'id',
+    // imediatly return last phase for each item acording to last tracking compare, without waiting finish perviues phases animation
     instantChange : false,
 }
 

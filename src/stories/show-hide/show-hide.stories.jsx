@@ -20,8 +20,6 @@ export default {
 const state2class = {
     [ADDED]: "xyz-appear",
     [REMOVED]: "xyz-out xyz-absolute",
-    [PREREMOVE]: "xyz-absolute",
-    [REMOVED]: "xyz-out xyz-absolute",
     [SWAP]: "xyz-in",
     [STATIC]: ''
 }
@@ -29,9 +27,7 @@ const state2class = {
 /*story: OneChild*/
 export function ShowHide(args) {
     const {show} = args;
-    const {item: flag, phase, ref, done} = useAnimeManager(show, {
-        oneAtATime: true,
-    });
+    const [{item: flag, phase, ref, done}] = useAnimeManager(show);
 
     /**
      * because there is no element when flag == false. `done` must call explicitly to
@@ -39,14 +35,16 @@ export function ShowHide(args) {
      * */
     if (!flag) done()
 
-    return <div>
-        <ol className="list-2" xyz={xyz}>{
-            flag && <li
-                class={["item", state2class[phase]].join(' ')}
-                ref={ref}
-                onAnimationEnd={done}
-            > {String(flag)? 'in': 'out'}</li>
-        }</ol>
-    </div>
+    return (
+        <div>
+            <ol className="list-2" xyz={xyz}>{
+                flag && <li
+                    class={["item", state2class[phase]].join(' ')}
+                    ref={ref}
+                    onAnimationEnd={done}
+                > {String(flag) ? 'in' : 'out'}</li>
+            }</ol>
+        </div>
+    )
 }
 

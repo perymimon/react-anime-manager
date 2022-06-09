@@ -16,7 +16,7 @@ export default {
         add: {action: true},
     },
     args: {
-        list: [ 1],
+        list: [1],
         add() {
 
         }
@@ -31,23 +31,20 @@ const xyz = "appear-narrow-50% appear-fade-100% out-right-100%";
 function ToolBar(props) {
     const {onAdd, onRemove} = props;
 
-    const removeInput = useRef(null);
-    const addInput = useRef(null);
-
     function handleAdd() {
-        onAdd(+addInput.current.value);
+        onAdd(+document.forms.inputs.children.addInput.value);
     }
 
     function handleRemove() {
-        onRemove(+removeInput.current.value);
+        onRemove(+document.forms.inputs.children.removeInput.value);
     }
 
-    return <div style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
+    return <form name="inputs" style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
         <button onClick={handleRemove}>remove from</button>
-        <input ref={removeInput} type="text" id="remove-from" defaultValue={1}/>
+        <input name="removeInput" defaultValue={1}/>
         <button onClick={handleAdd}>add in</button>
-        <input ref={addInput} type="text" id="add-from" defaultValue={0}/>
-    </div>
+        <input name="addInput" defaultValue={0}/>
+    </form>
 }
 
 function add(internalList, setList, counterRef, index) {
@@ -60,8 +57,7 @@ function remove(internalList, setList, counterRef, index) {
     setList(internalList.filter((c, i) => i !== pos));
 }
 
-
-function onAnimationEnd({dom}) {
+function onDone({dom}) {
     dom.classList.remove('xyz-appear')
     dom.classList.remove('xyz-in')
 }
@@ -69,9 +65,9 @@ function onAnimationEnd({dom}) {
 export function List({list}) {
     const [internalList, setList] = useState(list)
     const counterRef = useRef(list.length)
-    const items = useAnimeManager(internalList, {onEffect, onAnimationEnd});
+    const items = useAnimeManager(internalList, {onMotion, onDone});
 
-    function onEffect({dom, phase, dx, dy}) {
+    function onMotion({dom, phase, dx, dy}) {
         const state2class = {
             [ADDED]: "xyz-appear",
             [REMOVED]: "xyz-out xyz-absolute",
@@ -121,13 +117,11 @@ List.play = async function ({canvasElement}) {
 export function List2AbsMove({list}) {
     const [internalList, setList] = useState(list)
     const counterRef = useRef(list.length)
-    const items = useAnimeManager(internalList, {onEffect, onAnimationEnd});
+    const items = useAnimeManager(internalList, {onMotion, onDone});
 
-    function onEffect({dom, phase, trans_dx, trans_dy}) {
+    function onMotion({dom, phase, trans_dx, trans_dy}) {
         const state2class = {
             [ADDED]: "xyz-appear",
-            [REMOVED]: "xyz-out xyz-absolute",
-            [PREREMOVE]: "xyz-absolute",
             [REMOVED]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
@@ -160,22 +154,21 @@ export function List2AbsMove({list}) {
 
 }
 
-export function List2MetaMove({list}) {
+export function ListMetaMove({list}) {
     const [internalList, setList] = useState(list)
     const counterRef = useRef(list.length)
-    const items = useAnimeManager(internalList, {onEffect, onAnimationEnd});
+    const items = useAnimeManager(internalList, {onMotion, onDone});
 
-    function onEffect({dom, phase, meta_dx, meta_dy}) {
+    function onMotion({dom, phase, meta_dx, meta_dy}) {
         const state2class = {
             [ADDED]: "xyz-appear",
             [REMOVED]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
         }
+        const className = state2class[phase].split(' ')
         dom.style.setProperty("--xyz-translate-y", `${meta_dy}px`)
-        if (!dom.classList.contains(state2class[phase])) {
-            dom.classList.add(...state2class[phase].split(' '))
-        }
+        dom.classList.add(...className)
     }
 
     return <div>
@@ -183,19 +176,19 @@ export function List2MetaMove({list}) {
             onAdd={add.bind(this, internalList, setList, counterRef)}
             onRemove={remove.bind(this, internalList, setList, counterRef)}
         />
-        todo:  make meta run just when item removed from current
-        <ol className="list-1" xyz={xyz} style={{animationDuration: '3s'}}>
+        <ol className="list" xyz={xyz} style={{animationDuration: '3s'}}>
             {items.map((state) => {
-                    const {item: number, meta_phase, phase, ref, done, meta_dx, meta_dy,from,to, meta_from,meta_to,} = state;
-                    return <li key={'key' + number}
-                               className="item"
-                               ref={ref}
-                               onAnimationEnd={done}
-                    >item:{number} from:{meta_from}({from}) to:{meta_to}({to}) meta_dx:{~~meta_dx} meta_dy:{~~meta_dy} {meta_phase} {phase}</li>
-                }
-            )}
+                const {
+                    key, item: number, phase, ref, done, meta_dx,
+                    meta_dy, from, to, meta_from, meta_to,
+                } = state;
+                return (
+                    <li key={key} className="item" ref={ref} onAnimationEnd={done}>
+                        ITEM:{number} FROM:{meta_from}({from}) TO:{meta_to}({to})
+                        META_DX:{~~meta_dx} META_DY:{~~meta_dy} {phase}
+                    </li>
+                )
+            })}
         </ol>
-
     </div>
-
 }

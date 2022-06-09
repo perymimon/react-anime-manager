@@ -105,8 +105,7 @@ function test(name, tracking, options = {}) {
 
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
-    const defaults = useMemo(_ => ({oneAtATime: !Array.isArray(tracking)}), [])
-    const {oneAtATime, onEffect, onDone, instantChange = false} = {...defaults, ...options};
+    const {onMotion, onDone, instantChange = false} = options;
     const memory = useLongTimeMemory()
     options.exportHash = false;
     const intersection = useChangeIntersection(tracking, options);
@@ -150,12 +149,12 @@ export function useAnimeManager(tracking = [], options = {}) {
         }
         while (needResort)
         /** warn from slow removed animations */
-        WARNS(memory.size > 0 && (memory.size % 10) == 0 && oneAtATime, 'overflow', memory.size)
+        WARNS(memory.size > 0 && (memory.size % 10) == 0 , 'overflow', memory.size)
         return meta
     }, [cacheBuster, intersection])
 
-    useMotion(metaItems, onEffect, cacheBuster)
-    return (oneAtATime) ? metaItems[0] : metaItems
+    useMotion(metaItems, onMotion, cacheBuster)
+    return  metaItems
 }
 
 async function done(memory, forceRender, onDone) {

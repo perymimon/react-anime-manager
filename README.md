@@ -23,33 +23,79 @@ Then import it as hook into your component:
 import  {useAnimeManager} from "@perymimon/react-anime-manager";
 ```
 
-## 💻 simple primitive counter
+## 💻 simple classic list
 
-Let's create animated-counter.
+Let's create list with add and remove methods.
 
-`stateItems` store the metadata and used to create the returns JSX.     
-`tracking` is a simple primitive number, it this case the number himself used as tracking key for each `stateItem`.
+`states` store the metadata and used to create the returns JSX.     
+`tracking` is array of primitive numbers, In this case the number himself used as tracking key for each `state`.
 
 ```js codesandbox=animeManager
 import {useAnimeManager} from "@perymimon/react-anime-manager"
+import '@animxyz/core'
 
-export default function Counter({state2class, args}) {
-    const [count, setCounter] = useState(1)
-    const states = useAnimeManager(count)
+const xyz = "appear-narrow-50% appear-fade-100% out-right-100%";
 
-    useEffect(_ => {
-        setTimeout(_ => {
-            setCounter(count + 1);
-        }, 2000)
-    }, [count])
-
-    return states.map(({item: number, key, phase, done}) => (
-        <div key={key}
-             className={"item " + state2class[phase]}
-             onAnimationEnd={done}>{number}</div>
-    ))
-
+const phase2class = {
+    [ADDED]: "xyz-appear",
+    [REMOVED]: "xyz-out xyz-absolute",
+    [SWAP]: "xyz-in",
+    [STATIC]: 'static'
 }
+
+function List() {
+    const [internalList, setList] = useState([30,20,10])
+    const counterRef = useRef(30)
+    const states = useAnimeManager(internalList, {onMotion, onDone});
+
+    function onMotion({dom, phase, meta_dx, meta_dy}) {
+        const className = state2class[phase].split(' ')
+        dom.style.setProperty("--xyz-translate-y", `${meta_dy}px`)
+        dom.classList.add(...className)
+    }
+
+    function onDone({dom}) {
+        dom.classList.remove('xyz-appear','xyz-in')
+    }
+
+    function handleAdd() {
+        let index = (+document.forms.inputs.children.addInput.value)
+        internalList.splice(index, 0, ++counterRef.current);
+        setList([...internalList]);
+    }
+
+    function handleRemove() {
+        let index = (+document.forms.inputs.children.removeInput.value);
+        let pos = Math.min(internalList.length - 1, +index);
+        setList(internalList.filter((c, i) => i !== pos));
+    }
+    
+    return <div>
+        
+        <form name="inputs" style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
+            <button onClick={handleRemove}>remove from</button>
+            <input name="removeInput" defaultValue={1}/>
+            <button onClick={handleAdd}>add in</button>
+            <input name="addInput" defaultValue={0}/>
+        </form>
+        
+        <ol className="list" xyz={xyz} style={{animationDuration: '3s'}}>
+            {states.map((state) => {
+                const {
+                    key, item: number, phase, ref, done, meta_dx,
+                    meta_dy, from, to, meta_from, meta_to,
+                } = state;
+                return (
+                    <li key={key} className="item" ref={ref} onAnimationEnd={done}>
+                        ITEM:{number} FROM:{meta_from}({from}) TO:{meta_to}({to})
+                        META_DX:{~~meta_dx} META_DY:{~~meta_dy} {phase}
+                    </li>
+                )
+            })}
+        </ol>
+    </div>
+}
+
 ```
 For more examples click [here]()
 
@@ -72,19 +118,14 @@ options = {
     // imediatly return last phase for each item acording to last tracking compare, without waiting finish
     // perviues phases animation
     instantChange : false,
-    // call each time done call from item with phase diffrent then 'static' 
-    onDone: null || function(state),
-    // call imidaitaly after trasfom state calculated, dx,dy,trans_dx,trans_dy,meta_dx,meta_dy 
-    onMotion: null || function(state),
-    // working in progress
-    restartOnUnmount: true,
-     
 }
 
 ```
 
 ### State in States
+
 The result of whole calculation is array with metadata for each item was on tracking array that not removed + done yes
+
 ```javascript
 states[{
     //Original item that metadata refers to on the `tracking` parameter.
@@ -111,7 +152,7 @@ states[{
     // Instance of `React.createRef`. should be used by the developer, and attached to jsx `.item`'s componenet genereted 
     // Without that, `dx,dy,meta_dx,meta_dy,trans_dx,trans_dy` will be `0` constantly.
     ref: [internal React.createRef],
-    // A dom reference, equal to `.ref.current`. affter ADDED phase it should be exist contantyly 
+    // A dom reference, equal to `.ref.current`. affter ADDED phase it should be exist contanhtyly 
     dom: [browser DOM] || null,
     
     // Next variables will be 0 unless dom == [browser DOM]

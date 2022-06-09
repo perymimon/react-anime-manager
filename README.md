@@ -1,5 +1,5 @@
 ## Welcome to React Animation Manager version 2.0
-Rewrite from bottom up with ability on default to handle fast changes and calculate dom movement
+Rewrite from bottom up with abilities already by default to handle fast changes and calculate dom movement
 
 # Getting Started
 ## What is React-Animation-Manger

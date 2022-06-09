@@ -1,4 +1,4 @@
-import {ADD, REMOVE, STATIC, useAnimeManager} from '../anime-manager.js'
+import {ADDED, REMOVED, STATIC, useAnimeManager} from '../anime-manager.js'
 import {renderHook, act} from '@testing-library/react'
 
 function doneAll(current) {
@@ -19,7 +19,7 @@ test.skip('test one object phases  ', async () => {
 
     // first run should mark all items with [phase=add]
     expect(result.current).toMatchObject(
-        {item: 10, phase: ADD}
+        {item: 10, phase: ADDED}
     )
 
     await act(async () => {
@@ -30,7 +30,7 @@ test.skip('test one object phases  ', async () => {
 
     rerender(void 0) //<- REMOVE EVERYTHING
     // after empty item phase STATIC should update to REMOVE
-    expect(result.current).toMatchObject({item: 20, phase: REMOVE})
+    expect(result.current).toMatchObject({item: 20, phase: REMOVED})
 
     let untilDone = act(doneAll(result.current))
     // after done() REMOVE should remove from the list
@@ -42,11 +42,11 @@ test.skip('test one object phases  ', async () => {
 
 
     rerender(20) //<-ADD ITEM
-    expect(result.current).toMatchObject({item: 20, phase: ADD})
+    expect(result.current).toMatchObject({item: 20, phase: ADDED})
 
     rerender(30) //<--CHANGE ITEM IN middle operation
     //Nothing should change
-    expect(result.current).toMatchObject({item: 20, phase: ADD})
+    expect(result.current).toMatchObject({item: 20, phase: ADDED})
 
 
     untilDone = act(() => result.current.done())
@@ -54,7 +54,7 @@ test.skip('test one object phases  ', async () => {
     expect(result.current).toMatchObject({item: 20, phase: STATIC})
 
     await untilDone
-    expect(result.current).toMatchObject({item: 30, phase: ADD})
+    expect(result.current).toMatchObject({item: 30, phase: ADDED})
 
     untilDone = act(() => result.current.done())
     expect(result.current).toMatchObject({item: 30, phase: STATIC})

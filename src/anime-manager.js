@@ -5,11 +5,11 @@ import React, {
     useState,
     useEffect,
     useLayoutEffect,
-    useMemo,
+    useMemo, useTransition,
 } from "react";
 import LetMap from './let-map-basic'
 
-export const STATIC = 'static', ADD = 'added', REMOVE = 'removed', SWAP = 'swap';
+export const STATIC = 'static', ADDED = 'added', REMOVED = 'removed', SWAP = 'swap';
 export const PREREMOVE = 'preremoved', PREMOVE = 'premove';
 const wmKeys = new WeakMap();
 
@@ -43,6 +43,7 @@ export function useAppear() {
 function useDebounceRender() {
     const {current: resolvers} = useRef([]);
     const [cacheBuster, forceRender] = useState([]);
+    const [isPending, startTransition] = useTransition();
     useEffect(_ => {
         for (let res of resolvers) res()
         resolvers.length = 0;
@@ -52,7 +53,9 @@ function useDebounceRender() {
         return new Promise((res, rej) => {
             resolvers.push(res)
             if (resolvers.length > 1) return;
-            window.requestAnimationFrame(_ => forceRender([]))
+            startTransition(_ =>{
+                forceRender([])
+            })
         })
     }
 
@@ -128,8 +131,8 @@ export function useAnimeManager(tracking = [], options = {}) {
                 let cmp = a.to - b.to || a.from - b.from || b.ver - a.ver
                 if (cmp != 0) return cmp;
                 if (a.phase == b.phase) return 0;
-                if (a.phase == REMOVE) return -1;
-                if (b.phase == REMOVE) return 1;
+                if (a.phase == REMOVED) return -1;
+                if (b.phase == REMOVED) return 1;
                 return 0
             })
             // must care case that
@@ -137,7 +140,7 @@ export function useAnimeManager(tracking = [], options = {}) {
             for (let [i, state] of meta.entries()) {
                 state.meta_from ??= i
                 state.meta_to = i - compensation
-                if (state.phase == REMOVE) compensation++
+                if (state.phase == REMOVED) compensation++
                 // todo:make it under flag
                 else if (state.phase === SWAP && state.meta_from === state.meta_to) {
                     memory.shift(state.key)
@@ -161,10 +164,10 @@ async function done(memory, forceRender, onAnimationEnd) {
     if (phase == STATIC) return;
     record.dx = record.dy = record.meta_dx = record.meta_dy = 0;
     record.meta_from = record.meta_to     // make next animation smooth
-    if (phase === ADD || phase === SWAP) {
+    if (phase === ADDED || phase === SWAP) {
         record.phase = STATIC;
         record.from = record.to;
-    } else if (phase === REMOVE) {
+    } else if (phase === REMOVED) {
         memory.delete(key)
     }
     record.pipe.shift()
@@ -186,12 +189,12 @@ function useMotion(intersection, onMotion) {
     const {current: positionMemory} = useRef(new Map())
     useMemo(_ => {
         for (let [index, state] of intersection.entries()) {
-            state.dx ??= state.dy ??= state.abs_dx ??=
-                state.abs_dy ??= state.meta_dx ??= state.meta_dy ??= 0
+            state.dx = state.dy = state.abs_dx =
+                state.abs_dy = state.meta_dx = state.meta_dy = 0
             state.ref ??= createRef()
             try {
                 const {phase, ref: {current: dom}} = state;
-                if (phase === ADD) continue
+                if (phase === ADDED) continue
                 const {offsetLeft, offsetTop} = dom ?? {};
                 positionMemory.set(index, {offsetLeft, offsetTop})
             } catch (e) {
@@ -215,7 +218,7 @@ function useMotion(intersection, onMotion) {
             if (!dom) continue
             calculateVanillaTransform:{
                 try {
-                    if (state.phase === ADD) break calculateVanillaTransform
+                    if (state.phase === ADDED) break calculateVanillaTransform
                     let {offsetLeft: leftFrom, offsetTop: topFrom} = positionMemory.get(i)
                     let {offsetLeft: leftTo, offsetTop: topTo} = dom ?? {}
                     state.trans_dx = leftFrom - leftTo;
@@ -275,7 +278,7 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
         // register current items and assume they ADD
         for (let [i, item] of current.entries()) {
             let k = getKey(item, i);
-            let state = {item, key: k, phase: ADD, from: i, to: i}
+            let state = {item, key: k, phase: ADDED, from: i, to: i}
             hashMap.set(k, state)
             intersection.push(state)
         }
@@ -283,9 +286,9 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
         for (let [beforeIndex, item] of before.entries()) {
             let k = getKey(item, beforeIndex);
             let state = hashMap.get(k);
-            let phase = state ? (beforeIndex === state.to) ? STATIC : SWAP : REMOVE;
+            let phase = state ? (beforeIndex === state.to) ? STATIC : SWAP : REMOVED;
 
-            if (phase === REMOVE) {
+            if (phase === REMOVED) {
                 if (!withRemoved) continue
                 state = {item, key: k, phase, from: beforeIndex, to: beforeIndex,}
                 intersection.splice(beforeIndex, 0, state)

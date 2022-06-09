@@ -1,6 +1,6 @@
 import {useAnimeManager, SWAP,
-    ADD, REMOVE, STATIC, PREREMOVE} from "../../anime-manager";
-import React, {useEffect, useRef, useState} from "react";
+    ADDED, REMOVED, STATIC, PREREMOVE} from "../../anime-manager";
+import React, {useEffect, useState} from "react";
 import '@animxyz/core'
 import './counter.css'
 
@@ -21,10 +21,10 @@ export default {
 }
 
 const state2class = {
-    [ADD]: "xyz-appear",
-    [REMOVE]: "xyz-out xyz-absolute",
+    [ADDED]: "xyz-appear",
+    [REMOVED]: "xyz-out xyz-absolute",
     [PREREMOVE]: "xyz-absolute",
-    [REMOVE]: "xyz-out xyz-absolute",
+    [REMOVED]: "xyz-out xyz-absolute",
     [SWAP]: "xyz-in",
     [STATIC]: ''
 }
@@ -52,7 +52,7 @@ Counter1.id = "counter-1"
 export const CounterOneAtTime = function ({...args}) {
     const [count, setCounter] = useState(1)
     const {item: number, key, phase, done} = useAnimeManager(count, {oneAtATime: true})
-    const state2class2 = {...state2class, [REMOVE]: 'xyz-out'}
+    const state2class2 = {...state2class, [REMOVED]: 'xyz-out'}
     useEffect(_ => {
         setTimeout(_ => setCounter(1 + count), 1000)
     }, [count])

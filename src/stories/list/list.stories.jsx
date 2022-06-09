@@ -1,6 +1,6 @@
 import {
     useAnimeManager, SWAP,
-    ADD, REMOVE, STATIC, PREREMOVE
+    ADDED, REMOVED, STATIC, PREREMOVE
 } from "../../anime-manager"
 // LoginForm.stories.js|jsx
 
@@ -16,7 +16,7 @@ export default {
         add: {action: true},
     },
     args: {
-        list: [3, 2, 1],
+        list: [ 1],
         add() {
 
         }
@@ -73,10 +73,10 @@ export function List({list}) {
 
     function onEffect({dom, phase, dx, dy}) {
         const state2class = {
-            [ADD]: "xyz-appear",
-            [REMOVE]: "xyz-out xyz-absolute",
+            [ADDED]: "xyz-appear",
+            [REMOVED]: "xyz-out xyz-absolute",
             [PREREMOVE]: "xyz-absolute",
-            [REMOVE]: "xyz-out xyz-absolute",
+            [REMOVED]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
         }
@@ -125,10 +125,10 @@ export function List2AbsMove({list}) {
 
     function onEffect({dom, phase, trans_dx, trans_dy}) {
         const state2class = {
-            [ADD]: "xyz-appear",
-            [REMOVE]: "xyz-out xyz-absolute",
+            [ADDED]: "xyz-appear",
+            [REMOVED]: "xyz-out xyz-absolute",
             [PREREMOVE]: "xyz-absolute",
-            [REMOVE]: "xyz-out xyz-absolute",
+            [REMOVED]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
         }
@@ -167,8 +167,8 @@ export function List2MetaMove({list}) {
 
     function onEffect({dom, phase, meta_dx, meta_dy}) {
         const state2class = {
-            [ADD]: "xyz-appear",
-            [REMOVE]: "xyz-out xyz-absolute",
+            [ADDED]: "xyz-appear",
+            [REMOVED]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
             [STATIC]: 'static'
         }

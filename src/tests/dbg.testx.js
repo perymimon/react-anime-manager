@@ -1,4 +1,4 @@
-import {ADD, STATIC, useAnimeManager} from '../anime-manager.js'
+import {ADDED, STATIC, useAnimeManager} from '../anime-manager.js'
 import {renderHook, act} from '@testing-library/react'
 import {useEffect, useRef} from "react";
 

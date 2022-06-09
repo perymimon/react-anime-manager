@@ -1,10 +1,7 @@
-import {useAnimeManager, useAnimeEffect, SWAP, useAppear, ADD, REMOVE, STATIC} from "../../anime-manager";
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
 import {useChangeIntersection, usePrevious} from "../../anime-manager";
 import "./algorithem.stories.scss"
-import PropTypes from 'prop-types';
-
 
 export default {
     title: "test/algorithm",

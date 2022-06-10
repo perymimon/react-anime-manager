@@ -1,6 +1,6 @@
 {
   "name": "react-animation-manager",
-  "version": "0.1.0",
+  "version": "2.0.0-alpha.0",
   "private": true,
   "dependencies": {
     "@mdx-js/react": "^2.1.1",

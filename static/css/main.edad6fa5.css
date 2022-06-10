@@ -1,0 +1,102 @@
+@import url(https://fonts.googleapis.com/css?family=Indie+Flower);
+.stage{
+    height: -webkit-min-content;
+    height: min-content;
+}
+
+.item{
+    font-family: 'Indie Flower', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    box-sizing: border-box;
+
+    padding:0.2em;
+
+    font-weight: bold;
+    border-radius: 0.5em;
+
+    min-width: 10em;
+    width: -webkit-max-content;
+    width: max-content;
+    height: 2em;
+    display: grid;
+    justify-content: start;
+    align-content: center;
+    background-image: linear-gradient(to bottom, #9eff88, #85d672);
+    margin-bottom: 2px;
+    /*--xyz-translate-y: -100%;*/
+    /*--xyz-ease: cubic-bezier(0.5, -1.5, 0.5, 1.5);*/
+}
+/*li.item.xyz-absolute{*/
+/*    z-index: 10;*/
+/*    position: absolute;*/
+/*}*/
+.list-3{
+    display: grid;
+    flex-direction: row;
+    grid-template-columns: repeat(4, 15em);
+}
+
+.item-3{
+    width: 10em;
+    height: 2em;
+    background-image: linear-gradient(to bottom, #9eff88, #7bba69);
+    margin-bottom: 2px;
+}
+
+.my-xyz-move{
+    -webkit-animation-name: moves-edges;
+            animation-name: moves-edges;
+}
+.animation{
+    -webkit-animation: animation 0.5s;
+            animation: animation 0.5s;
+}
+@-webkit-keyframes animation{
+    from{
+        -webkit-transform:translate(var(--dx)px,var(--dy)px);
+                transform:translate(var(--dx)px,var(--dy)px)
+    }
+}
+@keyframes animation{
+    from{
+        -webkit-transform:translate(var(--dx)px,var(--dy)px);
+                transform:translate(var(--dx)px,var(--dy)px)
+    }
+}
+
+@-webkit-keyframes moves-edges {
+    50% {
+        -webkit-transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+                transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+    50.1% {
+        -webkit-transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+                transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+
+}
+
+@keyframes moves-edges {
+    50% {
+        -webkit-transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+                transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+    50.1% {
+        -webkit-transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+                transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+
+}
+
+table :is(td,th):nth-child(1){
+    with: 10%
+}
+table :is(td,th):nth-child(2){
+    width:60%
+}
+text{font-family:"Indie Flower",sans-serif;stroke-dasharray:100%;stroke-dashoffset:100%;-webkit-animation:draw 3s forwards;animation:draw 3s forwards;-webkit-animation-iteration-count:infinite;animation-iteration-count:infinite;fill:rgba(0,0,0,0);stroke:#000;stroke-width:1}@-webkit-keyframes draw{100%{stroke-dashoffset:0;stroke-dasharray:100%;fill:currentColor}}@keyframes draw{100%{stroke-dashoffset:0;stroke-dasharray:100%;fill:currentColor}}
+.stage{display:flex;flex-direction:row;gap:2em}.remove{text-decoration:line-through;justify-content:start}.add{color:blue}.column{min-width:15em}
+
+
+/*# sourceMappingURL=main.edad6fa5.css.map*/

@@ -1,4 +1,4 @@
-import {useAnimeManager, SWAP, ADDED, REMOVED, STATIC, PREREMOVE} from "../../anime-manager";
+import {useAnimeManager, SWAP, APPEAR, DISAPPEAR, STAY, PREREMOVE} from "../../anime-manager";
 import React from "react";
 import '@animxyz/core'
 import '../stories-style.css'
@@ -18,10 +18,10 @@ export default {
 }
 
 const state2class = {
-    [ADDED]: "xyz-appear",
-    [REMOVED]: "xyz-out xyz-absolute",
+    [APPEAR]: "xyz-appear",
+    [DISAPPEAR]: "xyz-out xyz-absolute",
     [SWAP]: "xyz-in",
-    [STATIC]: ''
+    [STAY]: ''
 }
 
 /*story: OneChild*/

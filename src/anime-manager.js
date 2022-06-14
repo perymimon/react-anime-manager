@@ -9,8 +9,8 @@ import React, {
 } from "react";
 import LetMap from './let-map-basic'
 
-export const STATIC = 'static', ADDED = 'added', REMOVED = 'removed', SWAP = 'swap';
-export const PREREMOVE = 'preremoved', PREMOVE = 'premove';
+export const STAY = 'STAY', APPEAR = 'APPEAR', DISAPPEAR = 'DISAPPEAR', SWAP = 'SWAP';
+
 const wmKeys = new WeakMap();
 
 function keyGenerator(item, i) {
@@ -24,11 +24,12 @@ function keyGenerator(item, i) {
 }
 
 export function usePrevious(value, initialValue, changedTracker) {
-    const ref = useRef(initialValue);
+    const ref = useRef({value:initialValue, ver:1});
+    const {current: {value:before, ver}} = ref;
     useEffect(() => {
-        ref.current = value;
+        ref.current = {value, ver: ver+1};
     }, [changedTracker ?? value].flat());
-    return ref.current;
+    return [before, ver];
 }
 
 export function useAppear() {
@@ -83,6 +84,11 @@ function useLongTimeMemory() {
             let record = memory.let(k)
             let {item, key, ...rest} = state
             record.item = item;
+            record.key = key;
+            if (record.pipe.at(-1)?.ver === v){
+                record.pipe.pop()
+            }
+
             rest.ver = v
             record.pipe.push(rest)
             // dense(record.pipe)
@@ -103,6 +109,9 @@ function test(name, tracking, options = {}) {
         throw `when tracing objects key must be provide`
 }
 
+/**
+ * Main Hook
+ */
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
     const {onMotion, onDone, instantChange = false} = options;
@@ -113,8 +122,8 @@ export function useAnimeManager(tracking = [], options = {}) {
 
     useMemo(function memoizeStates() {
         for (let state of intersection) {
-            if (state.phase !== STATIC)
-                memory.push(state.key, state, intersection[ver])
+            if (state.phase !== STAY)
+                memory.push(state.key, state, intersection[version])
         }
     }, [intersection])
 
@@ -130,8 +139,8 @@ export function useAnimeManager(tracking = [], options = {}) {
                 let cmp = a.to - b.to || a.from - b.from || b.ver - a.ver
                 if (cmp != 0) return cmp;
                 if (a.phase == b.phase) return 0;
-                if (a.phase == REMOVED) return -1;
-                if (b.phase == REMOVED) return 1;
+                if (a.phase == DISAPPEAR) return -1;
+                if (b.phase == DISAPPEAR) return 1;
                 return 0
             })
             // must care case that
@@ -139,7 +148,7 @@ export function useAnimeManager(tracking = [], options = {}) {
             for (let [i, state] of meta.entries()) {
                 state.meta_from ??= i
                 state.meta_to = i - compensation
-                if (state.phase == REMOVED) compensation++
+                if (state.phase == DISAPPEAR) compensation++
                 // todo:make it under flag
                 else if (state.phase === SWAP && state.meta_from === state.meta_to) {
                     memory.shift(state.key)
@@ -160,13 +169,13 @@ export function useAnimeManager(tracking = [], options = {}) {
 async function done(memory, forceRender, onDone) {
     const record = this;
     let {key, phase} = record;
-    if (phase == STATIC) return;
+    if (phase == STAY) return;
     record.dx = record.dy = record.meta_dx = record.meta_dy = 0;
     record.meta_from = record.meta_to     // make next animation smooth
-    if (phase === ADDED || phase === SWAP) {
-        record.phase = STATIC;
+    if (phase === APPEAR || phase === SWAP) {
+        record.phase = STAY;
         record.from = record.to;
-    } else if (phase === REMOVED) {
+    } else if (phase === DISAPPEAR) {
         memory.delete(key)
     }
     record.pipe.shift()
@@ -179,21 +188,19 @@ async function done(memory, forceRender, onDone) {
     }
 }
 
-/** just use the key on two runs of the running component ( with different array reference )
- to find which item added or removed */
-const ver = Symbol('ver')
-let counter = 0;
 
-function useMotion(intersection, onMotion) {
+
+
+function useMotion(metaItems, onMotion) {
     const {current: positionMemory} = useRef(new Map())
     useMemo(_ => {
-        for (let [index, state] of intersection.entries()) {
+        for (let [index, state] of metaItems.entries()) {
             state.dx = state.dy = state.abs_dx =
                 state.abs_dy = state.meta_dx = state.meta_dy = 0
             state.ref ??= createRef()
             try {
                 const {phase, ref: {current: dom}} = state;
-                if (phase === ADDED) continue
+                if (phase === APPEAR) continue
                 const {offsetLeft, offsetTop} = dom ?? {};
                 positionMemory.set(index, {offsetLeft, offsetTop})
             } catch (e) {
@@ -201,23 +208,23 @@ function useMotion(intersection, onMotion) {
                 console.error(e)
             }
         }
-    }, [intersection])
+    }, [metaItems])
 
     useLayoutEffect(_ => {
         const locationCache = new LetMap(index => {
-            let dom = intersection[index].ref.current
+            let dom = metaItems[index].ref.current
             const {offsetLeft, offsetTop} = dom ?? {};
             return {offsetLeft, offsetTop}
         })
 
-        for (let [i, state] of intersection.entries()) {
+        for (let [i, state] of metaItems.entries()) {
 
             let {ref: {current: dom}, from, to, phase} = state
             state.dom = dom
             if (!dom) continue
             calculateVanillaTransform:{
                 try {
-                    if (state.phase === ADDED) break calculateVanillaTransform
+                    if (state.phase === APPEAR) break calculateVanillaTransform
                     let {offsetLeft: leftFrom, offsetTop: topFrom} = positionMemory.get(i)
                     let {offsetLeft: leftTo, offsetTop: topTo} = dom ?? {}
                     state.trans_dx = leftFrom - leftTo;
@@ -248,18 +255,22 @@ function useMotion(intersection, onMotion) {
             }
         }
         // do callback after calculation so triggered it not disruption calculation
-        for (let state of intersection) {
+        for (let state of metaItems) {
             onMotion?.(state)
         }
-    }, [intersection])
+    }, [metaItems])
     // because it runs on different timing
 }
+
+/** using the key on two runs of the running component ( with different array reference )
+ to find which item added or removed */
+const version = Symbol('ver')
 
 export function useChangeIntersection(tracking, options = {}, postProcessing) {
     let {key, withRemoved = true, cacheBuster, exportHash} = options;
     key = key ?? options /*options consider as string*/;
     const current = [tracking].flat(1) // convert tracking to array
-    const before = usePrevious(current, [], [cacheBuster, tracking]);
+    const [before, ver] = usePrevious(current, [], [cacheBuster, tracking]);
 
     // if key not provided, use the keyValue at that position as key
     const getKey = (_ => {
@@ -273,11 +284,11 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
     return useMemo(_ => {
         const hashMap = new Map()
         const intersection = []
-        intersection[ver] = ++counter;
+        intersection[version] = ver;
         // register current items and assume they ADD
         for (let [i, item] of current.entries()) {
             let k = getKey(item, i);
-            let state = {item, key: k, phase: ADDED, from: i, to: i}
+            let state = {item, key: k, phase: APPEAR, from: i, to: i}
             hashMap.set(k, state)
             intersection.push(state)
         }
@@ -285,9 +296,9 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
         for (let [beforeIndex, item] of before.entries()) {
             let k = getKey(item, beforeIndex);
             let state = hashMap.get(k);
-            let phase = state ? (beforeIndex === state.to) ? STATIC : SWAP : REMOVED;
+            let phase = state ? (beforeIndex === state.to) ? STAY : SWAP : DISAPPEAR;
 
-            if (phase === REMOVED) {
+            if (phase === DISAPPEAR) {
                 if (!withRemoved) continue
                 state = {item, key: k, phase, from: beforeIndex, to: beforeIndex,}
                 intersection.splice(beforeIndex, 0, state)

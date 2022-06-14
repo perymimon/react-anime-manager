@@ -1,6 +1,6 @@
 import {
     useAnimeManager, SWAP,
-    ADDED, REMOVED, STATIC, PREREMOVE
+    APPEAR, DISAPPEAR, STAY, PREREMOVE
 } from "../../anime-manager"
 // LoginForm.stories.js|jsx
 
@@ -31,12 +31,14 @@ const xyz = "appear-narrow-50% appear-fade-100% out-right-100%";
 function ToolBar(props) {
     const {onAdd, onRemove} = props;
 
-    function handleAdd() {
+    function handleAdd(e) {
         onAdd(+document.forms.inputs.children.addInput.value);
+        e.preventDefault()
     }
 
-    function handleRemove() {
+    function handleRemove(e) {
         onRemove(+document.forms.inputs.children.removeInput.value);
+        e.preventDefault()
     }
 
     return <form name="inputs" style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
@@ -69,12 +71,12 @@ export function List({list}) {
 
     function onMotion({dom, phase, dx, dy}) {
         const state2class = {
-            [ADDED]: "xyz-appear",
-            [REMOVED]: "xyz-out xyz-absolute",
+            [APPEAR]: "xyz-appear",
+            [DISAPPEAR]: "xyz-out xyz-absolute",
             [PREREMOVE]: "xyz-absolute",
-            [REMOVED]: "xyz-out xyz-absolute",
+            [DISAPPEAR]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
-            [STATIC]: 'static'
+            [STAY]: 'static'
         }
         dom.style.setProperty("--xyz-translate-y", `${dy}px`)
         if (!dom.classList.contains(state2class[phase])) {
@@ -121,10 +123,10 @@ export function List2AbsMove({list}) {
 
     function onMotion({dom, phase, trans_dx, trans_dy}) {
         const state2class = {
-            [ADDED]: "xyz-appear",
-            [REMOVED]: "xyz-out xyz-absolute",
+            [APPEAR]: "xyz-appear",
+            [DISAPPEAR]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
-            [STATIC]: 'static'
+            [STAY]: 'static'
         }
         dom.style.setProperty("--xyz-translate-y", `${trans_dy}px`)
         if (!dom.classList.contains(state2class[phase])) {
@@ -161,14 +163,16 @@ export function ListMetaMove({list}) {
 
     function onMotion({dom, phase, meta_dx, meta_dy}) {
         const state2class = {
-            [ADDED]: "xyz-appear",
-            [REMOVED]: "xyz-out xyz-absolute",
+            [APPEAR]: "xyz-appear",
+            [DISAPPEAR]: "xyz-out xyz-absolute",
             [SWAP]: "xyz-in",
-            [STATIC]: 'static'
+            [STAY]: 'static'
         }
-        const className = state2class[phase].split(' ')
-        dom.style.setProperty("--xyz-translate-y", `${meta_dy}px`)
-        dom.classList.add(...className)
+        if( phase in state2class) {
+            const className = (state2class[phase]).split(' ')
+            dom.style.setProperty("--xyz-translate-y", `${meta_dy}px`)
+            dom.classList.add(...className)
+        }
     }
 
     return <div>

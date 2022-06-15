@@ -1,4 +1,4 @@
-## Welcome to React Animation Manager version 2.0
+## Welcome to React Animation Manager version 2.0-alpha
 Rewrite from bottom up with abilities already by default to handle fast changes and calculate dom movement
 
 # Getting Started
@@ -15,7 +15,7 @@ React-Anime-Manager is a hook approach for React that stabilize fast-rate of dat
 
 ## Installing
 ```cli
-npm i @perymimon/react-anime-manager
+npm i @perymimon/react-anime-manager@alpha.
 ```
 Then import it as hook into your component:
 
@@ -29,21 +29,21 @@ Let's create list with add and remove methods and use the external css lib `anim
 
 `states` store the metadata and used to create the JSX. `tracking` is our items and in this case it Array of primitive numbers, so each number himself used as tracking key identifier each `state`.
 
-```js codesandbox=animeManager
-import {useAnimeManager,ADD, REMOVED, SWAP, STATIC} from "@perymimon/react-anime-manager"
+```jsx codesandbox=animeManager
+import {useAnimeManager, ADD, REMOVED, SWAP, STATIC} from "@perymimon/react-anime-manager"
 import '@animxyz/core'
 
 const xyz = "appear-narrow-50% appear-fade-100% out-right-100%";
 
 const phase2class = {
-    [ADDED]: "xyz-appear",
+    [APPEAR]: "xyz-appear",
     [REMOVED]: "xyz-out xyz-absolute",
     [SWAP]: "xyz-in",
     [STATIC]: 'static'
 }
 
 function List() {
-    const [internalList, setList] = useState([30,20,10])
+    const [internalList, setList] = useState([30, 20, 10])
     const counterRef = useRef(30)
     const states = useAnimeManager(internalList, {onMotion, onDone});
 
@@ -54,7 +54,7 @@ function List() {
     }
 
     function onDone({dom}) {
-        dom.classList.remove('xyz-appear','xyz-in')
+        dom.classList.remove('xyz-appear', 'xyz-in')
     }
 
     function handleAdd() {
@@ -68,16 +68,16 @@ function List() {
         let pos = Math.min(internalList.length - 1, +index);
         setList(internalList.filter((c, i) => i !== pos));
     }
-    
+
     return <div>
-        
+
         <form name="inputs" style={{display: 'grid', gridTemplateColumns: '10em 10em'}}>
             <button onClick={handleRemove}>remove from</button>
             <input name="removeInput" defaultValue={1}/>
             <button onClick={handleAdd}>add in</button>
             <input name="addInput" defaultValue={0}/>
         </form>
-        
+
         <ol className="list" xyz={xyz} style={{animationDuration: '3s'}}>
             {states.map((state) => {
                 const {
@@ -125,7 +125,7 @@ options = {
 
 The result of whole calculation is array with metadata for each item was on tracking array that not removed + done yes
 
-```javascript
+```jsx
 states[{
     //Original item that metadata refers to on the `tracking` parameter.
     item: user,
@@ -139,7 +139,9 @@ states[{
     // * `REMOVED` - `item` are no longer on the `tracking` parameter.  after `done()` it removed completely from metadata array    
     phase:ADD,
     // Callback that must call every time developer finish deal with current phase. so hook can be process to next phase.
-    done(),
+    done(){},
+    // phases that not notify for item's phase change. good if you don't want deal with it.
+    skipPhases:[].
     // item's index in previous tracking array. when phase ADDED the value will be same as `.to`
     from:0,
     // item's index on current tracking array. when phases REMOVED the value will be same as `.from`

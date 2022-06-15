@@ -24,10 +24,10 @@ function keyGenerator(item, i) {
 }
 
 export function usePrevious(value, initialValue, changedTracker) {
-    const ref = useRef({value:initialValue, ver:1});
-    const {current: {value:before, ver}} = ref;
+    const ref = useRef({value: initialValue, ver: 1});
+    const {current: {value: before, ver}} = ref;
     useEffect(() => {
-        ref.current = {value, ver: ver+1};
+        ref.current = {value, ver: ver + 1};
     }, [changedTracker ?? value].flat());
     return [before, ver];
 }
@@ -54,7 +54,7 @@ function useDebounceRender() {
         return new Promise((res, rej) => {
             resolvers.push(res)
             if (resolvers.length > 1) return;
-            startTransition(_ =>{
+            startTransition(_ => {
                 forceRender([])
             })
         })
@@ -63,12 +63,27 @@ function useDebounceRender() {
     return [render, cacheBuster];
 }
 
-function useLongTimeMemory() {
+function debounce(fn, ms) {
+    let timer;
+    return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            fn.apply(this, args);
+        })
+    }
+}
+
+function useLongTimeMemory(time) {
     // todo: why useref can't take init function
     const {current: memory} = useRef(new LetMap(key => ({
         item: null,
         pipe: [],
-        key: key
+        key: key,
+        resetOverTimeWarning: debounce(function () {
+            const record = this
+            WARNS(record.phase !== STAY, 'overtime', record.phase, time, record)
+        }, time)
     })))
 
     useMemo(_ => {
@@ -85,13 +100,16 @@ function useLongTimeMemory() {
             let {item, key, ...rest} = state
             record.item = item;
             record.key = key;
-            if (record.pipe.at(-1)?.ver === v){
+            // if two state with same version, pop the oldest one
+            if (record.pipe.at(-1)?.ver === v) {
                 record.pipe.pop()
             }
 
             rest.ver = v
             record.pipe.push(rest)
-            // dense(record.pipe)
+            if (record.pipe.length === 1) {
+                record.resetOverTimeWarning()
+            }
             return Object.assign(record, record.pipe[0])
         }
     }, [])
@@ -114,15 +132,16 @@ function test(name, tracking, options = {}) {
  */
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
-    const {onMotion, onDone, instantChange = false} = options;
-    const memory = useLongTimeMemory()
+    const {onMotion, onDone, instantChange = false, overTimeWarning = 1000} = options;
+    const {skipPhases = []} = options;
+    const memory = useLongTimeMemory(overTimeWarning)
     options.exportHash = false;
     const intersection = useChangeIntersection(tracking, options);
     const [forceRender, cacheBuster] = useDebounceRender();
 
     useMemo(function memoizeStates() {
         for (let state of intersection) {
-            if (state.phase !== STAY)
+            if (state.phase !== STAY && !skipPhases.includes(state.phase))
                 memory.push(state.key, state, intersection[version])
         }
     }, [intersection])
@@ -158,16 +177,17 @@ export function useAnimeManager(tracking = [], options = {}) {
         }
         while (needResort)
         /** warn from slow removed animations */
-        WARNS(memory.size > 0 && (memory.size % 10) == 0 , 'overflow', memory.size)
+        WARNS(memory.size > 0 && (memory.size % 10) == 0, 'overflow', memory.size)
         return meta
     }, [cacheBuster, intersection])
 
     useMotion(metaItems, onMotion, cacheBuster)
-    return  metaItems
+    return metaItems
 }
 
 async function done(memory, forceRender, onDone) {
     const record = this;
+    record.resetOverTimeWarning()
     let {key, phase} = record;
     if (phase == STAY) return;
     record.dx = record.dy = record.meta_dx = record.meta_dy = 0;
@@ -187,8 +207,6 @@ async function done(memory, forceRender, onDone) {
         await forceRender()
     }
 }
-
-
 
 
 function useMotion(metaItems, onMotion) {
@@ -313,12 +331,15 @@ export function useChangeIntersection(tracking, options = {}, postProcessing) {
     }, [cacheBuster, tracking])
 }
 
-function WARNS(test, code, arg0) {
+function WARNS(test, code, arg0, arg1, arg2) {
     const codes = {
         'overflow':
             `above then ${arg0} items pending to draw. consider faster your animation`,
         'deltaStyle':
-            `delta style can be: "byPosition" or "byLocation", current:${arg0}`
+            `delta style can be: "byPosition" or "byLocation", current:${arg0}`,
+        'overtime':
+            `the phase ${arg0} take more then ${arg1}ms to done, consider faster your animation or 
+          add ${arg0} to options.skipPhases`,
     }
 
     test && console.warn(codes[code])

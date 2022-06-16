@@ -1,4 +1,4 @@
-import {ADDED, REMOVED, STATIC, useAnimeManager} from '../anime-manager.js'
+import {APPEAR, DISAPPEAR, STAY, useAnimeManager} from '../anime-manager.js'
 import {renderHook, act} from '@testing-library/react'
 
 function doneAll(current) {
@@ -19,18 +19,18 @@ test.skip('test one object phases  ', async () => {
 
     // first run should mark all items with [phase=add]
     expect(result.current).toMatchObject(
-        {item: 10, phase: ADDED}
+        {item: 10, phase: APPEAR}
     )
 
     await act(async () => {
         await result.current.done()
     })
     // after done element should move to phase == static
-    expect(result.current).toMatchObject({item: 10, phase: STATIC})
+    expect(result.current).toMatchObject({item: 10, phase: STAY})
 
     rerender(void 0) //<- REMOVE EVERYTHING
     // after empty item phase STATIC should update to REMOVE
-    expect(result.current).toMatchObject({item: 20, phase: REMOVED})
+    expect(result.current).toMatchObject({item: 20, phase: DISAPPEAR})
 
     let untilDone = act(doneAll(result.current))
     // after done() REMOVE should remove from the list
@@ -42,25 +42,25 @@ test.skip('test one object phases  ', async () => {
 
 
     rerender(20) //<-ADD ITEM
-    expect(result.current).toMatchObject({item: 20, phase: ADDED})
+    expect(result.current).toMatchObject({item: 20, phase: APPEAR})
 
     rerender(30) //<--CHANGE ITEM IN middle operation
     //Nothing should change
-    expect(result.current).toMatchObject({item: 20, phase: ADDED})
+    expect(result.current).toMatchObject({item: 20, phase: APPEAR})
 
 
     untilDone = act(() => result.current.done())
     // Add should move to STATIC when done
-    expect(result.current).toMatchObject({item: 20, phase: STATIC})
+    expect(result.current).toMatchObject({item: 20, phase: STAY})
 
     await untilDone
-    expect(result.current).toMatchObject({item: 30, phase: ADDED})
+    expect(result.current).toMatchObject({item: 30, phase: APPEAR})
 
     untilDone = act(() => result.current.done())
-    expect(result.current).toMatchObject({item: 30, phase: STATIC})
+    expect(result.current).toMatchObject({item: 30, phase: STAY})
 
     await untilDone
-    expect(result.current).toMatchObject({item: 30, phase: STATIC})
+    expect(result.current).toMatchObject({item: 30, phase: STAY})
 
 }, 5000)
 

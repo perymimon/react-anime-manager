@@ -1,4 +1,4 @@
-import {ADDED, SWAP, REMOVED, STATIC, useAnimeManager} from '../anime-manager.js'
+import {APPEAR, SWAP, DISAPPEAR, STAY, useAnimeManager} from '../anime-manager.js'
 import {renderHook, act} from '@testing-library/react'
 
 function doneAll(current) {
@@ -28,9 +28,9 @@ test('test array items phases [ADD,DELETE]', async () => {
 
     // first run should mark all items with [phase=add]
     expect(result.current).toMatchObject([
-        {item: 10, phase: ADDED},
-        {item: 20, phase: ADDED},
-        {item: 30, phase: ADDED}
+        {item: 10, phase: APPEAR},
+        {item: 20, phase: APPEAR},
+        {item: 30, phase: APPEAR}
     ])
 
     await act(async () => {
@@ -92,24 +92,24 @@ test('test array items phases [MOVE]', async function (){
 
     rerender([10,20,30])
     expect(result.current).toMatchObject([
-        {item: 10, phase: ADDED, from:Infinity, to:0},
-        {item: 20, phase: ADDED, from:Infinity, to:1},
-        {item: 30, phase: ADDED, from:Infinity, to:2}
+        {item: 10, phase: APPEAR, from:Infinity, to:0},
+        {item: 20, phase: APPEAR, from:Infinity, to:1},
+        {item: 30, phase: APPEAR, from:Infinity, to:2}
     ])
 
     // change order before previous operation end still should be stable
     rerender([30,20,10])
     expect(result.current).toMatchObject([
-        {item: 10, phase: ADDED, from:Infinity, to:0},
-        {item: 20, phase: ADDED, from:Infinity, to:1},
-        {item: 30, phase: ADDED, from:Infinity, to:2}
+        {item: 10, phase: APPEAR, from:Infinity, to:0},
+        {item: 20, phase: APPEAR, from:Infinity, to:1},
+        {item: 30, phase: APPEAR, from:Infinity, to:2}
     ])
 
     untilDone = act(doneAll(result.current))
     expect(result.current).toMatchObject([
-        {item: 10, phase: STATIC, from:0, to:0},
-        {item: 20, phase: STATIC, from:1, to:1},
-        {item: 30, phase: STATIC, from:2, to:2}
+        {item: 10, phase: STAY, from:0, to:0},
+        {item: 20, phase: STAY, from:1, to:1},
+        {item: 30, phase: STAY, from:2, to:2}
     ])
 
     await untilDone

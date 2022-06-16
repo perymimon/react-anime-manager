@@ -11,7 +11,9 @@ Terminology
 ------------
 `motion keys` are the keys on state: dx, dy, trans_dx, trans_dy, meta_dx, meta_dy
 * `pipe` abstract place to store the phases of a state
-* `react-render-cycle` cycle goes from after `useEffect` to after `useEffect`  
+* `react-render-cycle` cycle goes from after `useEffect` to after `useEffect`
+* `active phases` APPEAR, DISAPPEAR, SWAP
+* `delta keys`
 
 0. `item` : is the item that is being tracked, one part of the `tracking` array.
 1. `tracking`: is the array of data items that JSX component created from them will be animated.
@@ -35,6 +37,7 @@ same state must be provided on one react-render-cycle
 state, phase
 --------------
 each new item will start with APPEAR.
+each state must pointed to most recent item, all the time. 
 
 when updated tracking array will arrive, new `phase` calculated for the item(*):
 if item is on the same index on tracking array as in the previous tracking array, it will be 'STAY'.

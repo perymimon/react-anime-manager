@@ -74,7 +74,7 @@ function debounce(fn, ms) {
     }
 }
 
-function useLongTimeMemory(time) {
+function useLongTimeMemory(time, skip) {
     // todo: why useref can't take init function
     const {current: memory} = useRef(new LetMap(key => ({
         item: null,
@@ -100,6 +100,9 @@ function useLongTimeMemory(time) {
             let {item, key, ...rest} = state
             record.item = item;
             record.key = key;
+            if (state.phase === STAY) return record;
+            if (skip.includes(state.phase)) return record;
+
             // if two state with same version, pop the oldest one
             if (record.pipe.at(-1)?.ver === v) {
                 record.pipe.pop()
@@ -133,33 +136,32 @@ function test(name, tracking, options = {}) {
 export function useAnimeManager(tracking = [], options = {}) {
     // test(useAnimeManager.name, tracing, options)
     const {onMotion, onDone, instantChange = false, overTimeWarning = 1000} = options;
-    const {skipPhases = []} = options;
-    const memory = useLongTimeMemory(overTimeWarning)
+    const {skip = [], debug = false} = options;
+    const memory = useLongTimeMemory(overTimeWarning, skip)
     options.exportHash = false;
     const intersection = useChangeIntersection(tracking, options);
     const [forceRender, cacheBuster] = useDebounceRender();
 
     useMemo(function memoizeStates() {
         for (let state of intersection) {
-            if (state.phase !== STAY && !skipPhases.includes(state.phase))
-                memory.push(state.key, state, intersection[version])
+            memory.push(state.key, state, intersection[version])
         }
     }, [intersection])
 
     const metaItems = useMemo(function rebuild() {
         const meta = [...memory.values()]
         for (let record of meta) {
-            record.done = done.bind(record, memory, forceRender, onDone)
+            record.done = done.bind(record, memory, forceRender, onDone, debug)
         }
         let needResort;
         do {
             let needResort = false
             meta.sort((a, b) => {
                 let cmp = a.to - b.to || a.from - b.from || b.ver - a.ver
-                if (cmp != 0) return cmp;
-                if (a.phase == b.phase) return 0;
-                if (a.phase == DISAPPEAR) return -1;
-                if (b.phase == DISAPPEAR) return 1;
+                if (cmp !== 0) return cmp;
+                if (a.phase === b.phase) return 0;
+                if (a.phase === DISAPPEAR) return -1;
+                if (b.phase === DISAPPEAR) return 1;
                 return 0
             })
             // must care case that
@@ -167,7 +169,7 @@ export function useAnimeManager(tracking = [], options = {}) {
             for (let [i, state] of meta.entries()) {
                 state.meta_from ??= i
                 state.meta_to = i - compensation
-                if (state.phase == DISAPPEAR) compensation++
+                if (state.phase === DISAPPEAR) compensation++
                 // todo:make it under flag
                 else if (state.phase === SWAP && state.meta_from === state.meta_to) {
                     memory.shift(state.key)
@@ -177,7 +179,7 @@ export function useAnimeManager(tracking = [], options = {}) {
         }
         while (needResort)
         /** warn from slow removed animations */
-        WARNS(memory.size > 0 && (memory.size % 10) == 0, 'overflow', memory.size)
+        WARNS(memory.size > 0 && (memory.size % 10) === 0, 'overflow', memory.size)
         return meta
     }, [cacheBuster, intersection])
 
@@ -185,21 +187,24 @@ export function useAnimeManager(tracking = [], options = {}) {
     return metaItems
 }
 
-async function done(memory, forceRender, onDone) {
+async function done(memory, forceRender, onDone, debug) {
     const record = this;
     record.resetOverTimeWarning()
     let {key, phase} = record;
-    if (phase == STAY) return;
-    record.dx = record.dy = record.meta_dx = record.meta_dy = 0;
-    record.meta_from = record.meta_to     // make next animation smooth
-    if (phase === APPEAR || phase === SWAP) {
-        record.phase = STAY;
-        record.from = record.to;
-    } else if (phase === DISAPPEAR) {
-        memory.delete(key)
+    if (phase === STAY) return;
+    clearBetween:{
+        if (debug === true) break clearBetween;
+        record.dx = record.dy = record.meta_dx = record.meta_dy = 0;
+        record.meta_from = record.meta_to     // make next animation smooth
+        if (phase === APPEAR || phase === SWAP) {
+            record.phase = STAY;
+            record.from = record.to;
+        } else if (phase === DISAPPEAR) {
+            memory.delete(key)
+        }
+        await forceRender()
     }
     record.pipe.shift()
-    await forceRender()
     await onDone?.(record)
     if (record.pipe.length > 0) {
         memory.assign(record)

@@ -1,4 +1,4 @@
-## Welcome to React Animation Manager version 2.0-alpha
+## Welcome to React Animation Manager version 2.0
 Rewrite from bottom up with abilities already by default to handle fast changes and calculate dom movement
 
 # Getting Started
@@ -11,7 +11,7 @@ React-Anime-Manager is a hook approach for React that stabilize fast-rate of dat
 * 🚀 Blazing fast builds and performance.
 * 🚚 Data Agnostic.
 * 🥇 React-centric developer experience.
-* not using any other npm module
+* 💪 not using any other npm module
 
 ## Installing
 ```cli
@@ -141,7 +141,7 @@ states[{
     // Callback that must call every time developer finish deal with current phase. so hook can be process to next phase.
     done(){},
     // phases that not notify for item's phase change. good if you don't want deal with it.
-    skipPhases:[].
+    skip:[],
     // item's index in previous tracking array. when phase ADDED the value will be same as `.to`
     from:0,
     // item's index on current tracking array. when phases REMOVED the value will be same as `.from`
@@ -156,7 +156,7 @@ states[{
     // A dom reference, equal to `.ref.current`. affter ADDED phase it should be exist contanhtyly 
     dom: [browser DOM] || null,
     
-    // Next variables will be 0 unless dom == [browser DOM]
+    // Next variables will be 0 unless `dom` refere to [browser DOM]
     
     // return the distance dom moved between previous render and current one. that variables updated after 
     // `useEffect` and developer can read them immediately on callback `oneffect(state)`

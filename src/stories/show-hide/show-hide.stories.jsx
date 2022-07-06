@@ -1,4 +1,4 @@
-import {useAnimeManager, SWAP, APPEAR, DISAPPEAR, STAY, PREREMOVE} from "../../anime-manager";
+import {useAnimeManager, SWAP, APPEAR, DISAPPEAR, STAY, PREREMOVE} from "../../useAnimeManager.js";
 import React from "react";
 import '@animxyz/core'
 import '../stories-style.css'

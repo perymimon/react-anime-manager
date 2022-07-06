@@ -1,7 +1,7 @@
 import {
     useAnimeManager, SWAP,
     APPEAR, DISAPPEAR, STAY, PREREMOVE
-} from "../../anime-manager"
+} from "../../useAnimeManager.js"
 // LoginForm.stories.js|jsx
 
 import {within, userEvent} from '@storybook/testing-library';

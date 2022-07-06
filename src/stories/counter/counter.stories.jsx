@@ -1,7 +1,7 @@
 import {
     useAnimeManager, SWAP,
     APPEAR, DISAPPEAR, STAY, PREREMOVE
-} from "../../anime-manager";
+} from "../../useAnimeManager.js";
 import React, {useEffect, useState} from "react";
 import '@animxyz/core'
 import './counter.css'
@@ -34,9 +34,12 @@ export const Counter1 = function ({...args}) {
     const states = useAnimeManager(count)
 
     useEffect(_ => {
-        setTimeout(_ => {
-            setCounter(count + 1);
-        }, 1500)
+        useEffect(() => {
+            const id = setInterval(() => {
+                setCounter(c => c + 1); // ✅ This doesn't depend on `count` variable outside
+            }, 1000);
+            return () => clearInterval(id);
+        }, []); // ✅ Our effect doesn't use any variables in the component scope
     }, [count])
 
     return (

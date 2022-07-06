@@ -1,4 +1,4 @@
-import {APPEAR, DISAPPEAR, STAY, useAnimeManager} from '../anime-manager.js'
+import {APPEAR, DISAPPEAR, STAY, useAnimeManager} from '../src/useAnimeManager.js'
 import {renderHook, act} from '@testing-library/react'
 
 function doneAll(current) {

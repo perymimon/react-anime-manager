@@ -1,13 +1,14 @@
 {
   "name": "@perymimon/react-anime-manager",
-  "version": "2.0.5",
+  "version": "3.0.0",
   "type": "module",
   "private": false,
-  "main": "src/anime-manager.js",
+  "main": "src/useAnimeManager.js",
   "files": [
     "src",
     "!src/stories",
-    "!src/tests"
+    "!src/tests",
+    "!src/*.test.js"
   ],
   "workspaces": [
     "../"
@@ -24,11 +25,10 @@
     "xpostinstall": "npm link @perymimon/react-hooks @perymimon/let-map"
   },
   "dependencies": {
-
+    "@perymimon/let-map": "^1.0.1-beta.0",
+    "@perymimon/react-hooks": "1.0.0-beta.9"
   },
   "peerDependencies": {
-    "@perymimon/react-hooks": "C:\\CODE\\projects\\react-hooks\\perymimon-react-hooks-1.0.0-beta.4.tgz",
-    "@perymimon/let-map": "^1.0.1",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
@@ -69,5 +69,4 @@
   "jest": {
     "transform": {}
   }
-
 }

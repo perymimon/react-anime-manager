@@ -1,6 +1,6 @@
 import {renderHook, act} from '@testing-library/react-hooks'
 
-import {STAY, APPEAR, useBufferedIntersection, DISAPPEAR, SWAP} from './useBufferedIntersection.js';
+import {STAY, APPEAR, useDataIntersectionWithFuture, DISAPPEAR, SWAP} from './useDataIntersectionWithFuture.js';
 import useRenderCount from "@perymimon/react-hooks/src/debuging/useRenderCount.js";
 
 describe('testing useStateWithBuffer', () => {
@@ -10,7 +10,7 @@ describe('testing useStateWithBuffer', () => {
         ({rerender, result} = renderHook(
             ([tracking, options]) => {
                 // console.log('rendering', tracking, options)
-                return [useBufferedIntersection(tracking, options), useRenderCount()]
+                return [useDataIntersectionWithFuture(tracking, options), useRenderCount()]
             },
             {initialProps: [void 0, void 0]}
         ));
@@ -40,7 +40,7 @@ describe('testing useStateWithBuffer', () => {
 
     it('should return APPEAR for new items, and STAY after done', async () => {
 
-        acting(() => rendering([1, 2]));
+        await acting(() => rendering([1, 2]));
         expect(array).toMatchObject([{
             key: 1, item: 1, from: 0, to: 0, phase: APPEAR
         }, {
@@ -73,8 +73,8 @@ describe('testing useStateWithBuffer', () => {
         }])
     })
     it('should hold State until done is called', async () => {
-        acting(() => rendering([1]));
-        acting(() => rendering([]));
+        await acting(() => rendering([1]));
+        await acting(() => rendering([]));
         expect(count.fullRender).toBeGreaterThanOrEqual(2)
 
         expect(array).toMatchObject([{
@@ -93,13 +93,13 @@ describe('testing useStateWithBuffer', () => {
 
     })
     it('should rerender STAY between phase changing, but not after DISAPPEAR', async () => {
-        console.log('loop track', 'after init \t\t', count)
+        // console.log('loop track', 'after init \t\t', count)
         await acting(() => rendering([1, 2]));
-        console.log('loop track', 'after rerender with [1,2]\t', count)
+        // console.log('loop track', 'after rerender with [1,2]\t', count)
         await acting(() => rendering([]));
-        console.log('loop track', 'after rerender with []\t\t', count)
+        // console.log('loop track', 'after rerender with []\t\t', count)
         let wait = acting(() => done(1));
-        console.log('loop track', 'after called done(1)\t\t', count)
+        // console.log('loop track', 'after called done(1)\t\t', count)
         expect(array).toMatchObject([{
             key: 1, item: 1, from: 0, to: 0, phase: STAY
         }, {
@@ -107,7 +107,7 @@ describe('testing useStateWithBuffer', () => {
         }])
         expect(count.fullRender).toBeGreaterThanOrEqual(5)
         await wait;
-        console.log('loop track', 'after called await done(1)\t\t', count)
+        // console.log('loop track', 'after called await done(1)\t\t', count)
         expect(count.fullRender).toBeGreaterThanOrEqual(6)
         expect(array).toMatchObject([{
             key: 1, item: 1, from: 0, to: 0, phase: DISAPPEAR
@@ -118,12 +118,13 @@ describe('testing useStateWithBuffer', () => {
         expect(array).toMatchObject([{
             key: 2, item: 2, from: 1, to: 1, phase: APPEAR
         }])
+        return wait;
 
     })
 
 
     it('should respect skip option with APPEAR', async () => {
-        acting(() => rendering([1, 2], [APPEAR]));
+        await acting(() => rendering([1, 2], [APPEAR]));
         expect(array).toMatchObject([{
             key: 1, item: 1, from: 0, to: 0, phase: STAY
         }, {
@@ -153,16 +154,11 @@ describe('testing useStateWithBuffer', () => {
 
 
     })
-    it('should hold DISAPPEAR items on there previous position', () => {
-    })
-    it('should remove DISAPPEAR items from list they done and not let them came', () => {
-    })
-    it('should track SWAP Items', () => {
-    })
-    it('should ignore done on item with empty buffer phases', () => {
-    })
-    it('should handle multiple states buffers for each item and shift state per item on each done', () => {
-    })
+    it.todo('should hold DISAPPEAR items on there previous position')
+    it.todo('should remove DISAPPEAR items from list they done and not let them came')
+    it.todo('should track SWAP Items')
+    it.todo('should ignore done on item with empty buffer phases')
+    it.todo('should handle multiple states buffers for each item and shift state per item on each done')
 
 
 })

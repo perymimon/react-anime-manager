@@ -1,5 +1,11 @@
-## Welcome to React Animation Manager version 2.0
-Rewrite from bottom up with abilities already by default to handle fast changes and calculate dom movement
+## Welcome to React Animation Manager version 2.0-alpha
+Rewrite bottom-up with default abilities to handle fast changes and calculate dom movement
+
+-------- 
+
+ [if you like it star 🌟 it](https://github.com/perymimon/react-anime-manager/stargazers) so it continues  evolved 
+
+----------
 
 # Getting Started
 ## What is React-Animation-Manger

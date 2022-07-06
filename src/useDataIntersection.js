@@ -1,4 +1,4 @@
-import {usePrevious} from "./helpers";
+import {usePrevious} from "@perymimon/react-hooks";
 
 import {useMemo} from "react";
 export const VERSION = Symbol('ver')
@@ -11,15 +11,14 @@ export function keyGenerator(item, i) {
     // todo: make it work like a counter instead of random
     const str = 'abcdefghijklmnop1234567890'
     const {random, floor} = Math;
-    key = Array.from({length: 4}, (i) => str[floor(random() * str.length)]).join('');
+    key = Array.from({length: 4}, (useChangeIntersectioni) => str[floor(random() * str.length)]).join('');
     return key;
 }
 
-export function useChangeIntersection(tracking, options = {}, postProcessing) {
+export function useDataIntersection(tracking, key, options = {}, postProcessing) {
     if (!tracking) tracking = [];
     // if(!tracking) throw new Error('tracking is required');
-    let {key, withRemoved = true, exportHash} = options;
-    key = key ?? options /*options consider as string*/;
+    let {withRemoved = true, exportHash} = options;
     const current = [tracking].flat(1) // convert tracking to array
     const [before, ver] = usePrevious(current, [], [tracking]);
 

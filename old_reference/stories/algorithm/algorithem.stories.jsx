@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import '@animxyz/core'
-import {useChangeIntersection, usePrevious} from "../../useAnimeManager.js";
+import {useChangeIntersection, usePrevious} from "../../../src/useAnimeManager.js";
 import "./algorithem.stories.scss"
 
 export default {

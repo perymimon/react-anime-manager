@@ -23,7 +23,7 @@
     "../"
   ],
   "scripts": {
-    "start:examples": "vite examples",
+    "start:ex": "vite examples",
     "xstart": "react-scripts start",
     "xbuild": "react-scripts build",
     "test": "nodemon --experimental-vm-modules node_modules/jest/bin/jest.js --verbose",

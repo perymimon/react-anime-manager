@@ -1,4 +1,4 @@
-import {APPEAR, STAY, useAnimeManager} from '../src/useAnimeManager.js'
+import {APPEAR, STAY, useAnimeManager} from '../../src/useAnimeManager.js'
 import {renderHook, act} from '@testing-library/react'
 import {useEffect, useRef} from "react";
 

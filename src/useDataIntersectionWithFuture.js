@@ -23,6 +23,8 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
     const recordsMap = useLetMap(recordTemplate)
     const records = useRef([]);
 
+
+
     const done = useCallback(async function done(key) {
         let record = recordsMap.get(key)
         if (record.phase === STAY) return;
@@ -44,12 +46,18 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
         }
     })
 
+    // must update item all the time
+    for (let state of intersection) {
+        let record = recordsMap.let(state.key)
+        record.item = state.item
+    }
+
     useRun(function memoizeStates() {
         for (let state of intersection) {
             const {item, key, ...slimState} = state;
             if (state.phase === STAY) continue;
             let record = recordsMap.let(key)
-            record.item = item
+            record.item = state.item
             slimState.ver = intersection[VERSION]
             if (push(key, slimState)) {
                 Object.assign(record, slimState)

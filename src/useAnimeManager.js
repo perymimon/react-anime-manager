@@ -2,9 +2,11 @@
 import {useCallback, useDebugValue} from "react";
 import {WARNS} from "./warns.js";
 import {debounce} from "./helpers.js";
-import {useDataIntersectionWithFuture, STAY} from "./useDataIntersectionWithFuture.js";
+import {useDataIntersectionWithFuture, VERSION, DISAPPEAR, STAY, SWAP, APPEAR} from "./useDataIntersectionWithFuture.js";
 import {useTraceMovement} from "./useTraceMovement.js";
 import {useRun} from "@perymimon/react-hooks";
+
+export {DISAPPEAR, STAY, SWAP, APPEAR, VERSION}
 
 function timeoutWarning(record, time) {
     WARNS(record.phase !== STAY, 'overtime', record.phase, time, record)

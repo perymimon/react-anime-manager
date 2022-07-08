@@ -1,7 +1,7 @@
 import {
     useAnimeManager, SWAP,
     APPEAR, DISAPPEAR, STAY, PREREMOVE
-} from "../../useAnimeManager.js";
+} from "../../../src/useAnimeManager.js";
 import React, {useEffect, useState} from "react";
 import '@animxyz/core'
 import './counter.css'

@@ -24,16 +24,16 @@ export function useDataIntersection(tracking, key, options = {}, postProcessing)
 
     // if key not provided, use the keyValue at that position as key
     const getKey = (_ => {
-        if (typeof key === 'function') return key // key(item,i);
+        if (typeof key === 'function') return key // called as key(item,i);
         if (key === 'index') return (item, i) => i;
-        if (key === 'generate') return keyGenerator // (item,i);
+        if (key === 'generate') return keyGenerator // called (item,i);
         if (typeof key === 'string') return (item, i) => item[key]
         return (item, i) => item;
     })();
 
     return useMemo(_ => {
         const hashMap = new Map()
-        const intersection = []
+        let intersection = []
         intersection[VERSION] = ver;
         // register current items and assume they ADD
         for (let [i, item] of current.entries()) {
@@ -55,10 +55,12 @@ export function useDataIntersection(tracking, key, options = {}, postProcessing)
                 hashMap.set(k, state)
             } else Object.assign(state, {from: beforeIndex, phase})
         }
+        /** run postProcessing if it returns nothing return intersection array */
+        intersection = postProcessing?.(intersection, hashMap) ?? intersection
         if (exportHash) return [intersection, hashMap]
-        /** run postProcessing if it not return something return intersection array */
-        return postProcessing?.(intersection) ?? intersection
-        // return intersection;
+
+        return intersection
+
 
     }, [tracking])
 }

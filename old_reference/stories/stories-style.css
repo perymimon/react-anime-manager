@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css?family=Indie+Flower');
+
+.stage{
+    height: min-content;
+}
+
+.item{
+    font-family: 'Indie Flower', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    box-sizing: border-box;
+
+    padding:0.2em;
+
+    font-weight: bold;
+    border-radius: 0.5em;
+
+    min-width: 10em;
+    width: max-content;
+    height: 2em;
+    display: grid;
+    justify-content: start;
+    align-content: center;
+    background-image: linear-gradient(to bottom, #9eff88, #85d672);
+    margin-bottom: 2px;
+    /*--xyz-translate-y: -100%;*/
+    /*--xyz-ease: cubic-bezier(0.5, -1.5, 0.5, 1.5);*/
+}
+/*li.item.xyz-absolute{*/
+/*    z-index: 10;*/
+/*    position: absolute;*/
+/*}*/
+.list-3{
+    display: grid;
+    flex-direction: row;
+    grid-template-columns: repeat(4, 15em);
+}
+
+.item-3{
+    width: 10em;
+    height: 2em;
+    background-image: linear-gradient(to bottom, #9eff88, #7bba69);
+    margin-bottom: 2px;
+}
+
+.my-xyz-move{
+    animation-name: moves-edges;
+}
+.animation{
+    animation: animation 0.5s;
+}
+@keyframes animation{
+    from{
+        transform:translate(var(--dx)px,var(--dy)px)
+    }
+}
+
+@keyframes moves-edges {
+    50% {
+        transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+    50.1% {
+        transform: translateX( calc( -1 * var(--xyz-translate-x) / 2) );
+    }
+
+}
+
+table :is(td,th):nth-child(1){
+    with: 10%
+}
+table :is(td,th):nth-child(2){
+    width:60%
+}

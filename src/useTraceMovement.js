@@ -7,55 +7,57 @@ const transitionTemplate = (key) => ({
     dx: 0, dy: 0, isMove: false, offsetLeft: NaN, offsetTop: NaN
 });
 
-export function useTraceMovement(records, keyName) {
+export function useTraceMovement(records, keyName, options = {}) {
+    const {onMove} = options;
     const recordMap = useArrayToMap(records, keyName)
-    const stateMap = useLetMap(transitionTemplate)
-    useDebugValue(stateMap)
+    const motionMap = useLetMap(transitionTemplate)
+    useDebugValue(motionMap)
     const jsxFactory = useRef(null)
 
-    const jsxTemplate = useCallback((record, state) => {
-        return cloneElement(jsxFactory.current(record, state), {
+    const jsxTemplate = useCallback((record, motion) => {
+        return cloneElement(jsxFactory.current(record, motion), {
             key: record[keyName], ref: createRef()
         })
     }, [keyName])
 
-    const jsxMap = useLetMap(key => jsxTemplate(recordMap.get(key), stateMap.let(key)))
+    const thereIsCallback = onMove instanceof Function;
+    const jsxMap = useLetMap(key => jsxTemplate(recordMap.get(key), motionMap.let(key)))
 
     // run every time after layout is done, to update records change,
     useLayoutEffect(() => {
-        // skip this update if user not read the second parameter, one with the movement state
-        const funcParameters = jsxFactory.current?.length
-        if(funcParameters === undefined || funcParameters < 2) return;
-
+        {
+            // skip this update if user not read the second parameter, one with the movement state
+            const funcParameters = jsxFactory.current?.length
+            const jsxGeneratorUseMoveStateParameter = funcParameters >= 2
+            if (!jsxGeneratorUseMoveStateParameter || !thereIsCallback) return;
+        }
         for (let record of records) {
             let key = record[keyName]
-            let state = stateMap.let(key)
+            let motion = motionMap.let(key)
             let dom = jsxMap.get(key).ref.current
+            record.dom = dom
             let move = {
-                dx: (state.offsetLeft - dom.offsetLeft) || 0,
-                dy: (state.offsetTop - dom.offsetTop) || 0,
+                dx: (motion.offsetLeft - dom.offsetLeft) || 0,
+                dy: (motion.offsetTop - dom.offsetTop) || 0,
             }
-            state.offsetLeft = dom.offsetLeft
-            state.offsetTop = dom.offsetTop
+            motion.offsetLeft = dom.offsetLeft
+            motion.offsetTop = dom.offsetTop
             if (move.dx !== 0 || move.dy !== 0) {
-                Object.assign(state, {
+                Object.assign(motion, {
                     ...move,
+                    dom, // todo: maybe should be record.dom
                     offsetLeft: dom.offsetLeft,
                     offsetTop: dom.offsetTop,
                     isMove: true
                 });
-                jsxMap.set(key, jsxTemplate(record, state))
+
+                let callRerender = onMove?.(record, motion) // if user want to force rerender, return explicit true
+                jsxMap.set(key, jsxTemplate(record, motion) , !thereIsCallback || callRerender === true)
             }
         }
     }, [records])
     // update cache before useEEffect  but external to `transitions` to let useEEffect do it thing
     useRun(() => {
-        // if (!jsx.current) return
-        // for (let record of records) {
-        //     let key = record[keyName]
-        //     let state = stateMap.let(key)
-        //     jsxMap.set(key, jsxTemplate(record, state))
-        // }
         // clear it so transitions will create them from scratch JIT and then serve after effect version
         jsxMap.clear()
     }, [records])
@@ -66,9 +68,9 @@ export function useTraceMovement(records, keyName) {
     }, [records])
 
     const reset = useCallback(function done(key) {
-        let state = stateMap.get(key)
-        state.isMove = false
-        state.dx = state.dy =  0;
+        let motion = motionMap.get(key)
+        motion.isMove = false
+        motion.dx = motion.dy =  0;
     },[])
 
     return [transitions, reset]

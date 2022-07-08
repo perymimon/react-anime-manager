@@ -11,10 +11,13 @@ const recordTemplate = (key) => ({
     from: 0,
     to: 0,
     phase: STAY,
+    lastPhase: STAY,
+    ver: 0,
 })
 
 // note: array records change reference when tracking change, but each record save reference per tracking id
 export function useDataIntersectionWithFuture(tracking, key, options = {}) {
+
     const {skipPhases = [], onDone} = options
     const intersection = useDataIntersection(tracking, key, options);
     const {push, shift, peek, map} = useLetMapQueue()
@@ -30,6 +33,7 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
             recordsMap.delete(key)
         }
         record.from = record.to;
+        record.lastPhase = record.phase;
         record.phase = STAY;
         records.current = sortedMapValues(recordsMap, intersection[VERSION])
         onDone?.(record)
@@ -44,12 +48,12 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
         }
     })
 
+
     useRun(function memoizeStates() {
         for (let state of intersection) {
             const {item, key, ...slimState} = state;
             if (state.phase === STAY) continue;
             let record = recordsMap.let(key)
-            record.item = item
             slimState.ver = intersection[VERSION]
             if (push(key, slimState)) {
                 Object.assign(record, slimState)
@@ -61,6 +65,12 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
 
     }, [intersection[VERSION]])
 
+    // must update item all the time
+    for (let state of intersection) {
+        let record = recordsMap.get(state.key)
+        if(!record) continue;
+        record.item = state.item
+    }
 
     return [records.current, done]
 }

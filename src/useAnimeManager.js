@@ -2,9 +2,11 @@
 import {useCallback, useDebugValue} from "react";
 import {WARNS} from "./warns.js";
 import {debounce} from "./helpers.js";
-import {useDataIntersectionWithFuture, STAY} from "./useDataIntersectionWithFuture.js";
+import {useDataIntersectionWithFuture, VERSION, DISAPPEAR, STAY, SWAP, APPEAR} from "./useDataIntersectionWithFuture.js";
 import {useTraceMovement} from "./useTraceMovement.js";
 import {useRun} from "@perymimon/react-hooks";
+
+export {DISAPPEAR, STAY, SWAP, APPEAR, VERSION}
 
 function timeoutWarning(record, time) {
     WARNS(record.phase !== STAY, 'overtime', record.phase, time, record)
@@ -14,7 +16,7 @@ const META = Symbol('meta');
 
 /** * Main Hook */
 export function useAnimeManager(tracking = [], key, options = {}) {
-    const {onMotion, onDone, maxAnimationTime = 1000} = options;
+    const {onDone, maxAnimationTime = 1000} = options;
 
     const handleDone = useCallback(function (record) {
         record[META].timeoutWarning()
@@ -22,9 +24,11 @@ export function useAnimeManager(tracking = [], key, options = {}) {
         onDone?.(record)
     })
     options.onDone = handleDone;
+    options.exportHash = false;
+    options.withRemoved = true;
     // note: records change reference when tracking change, but each record have persisted reference
     const [records, done] = useDataIntersectionWithFuture(tracking, key, options);
-    const [transitions,reset] = useTraceMovement(records, 'key' );
+    const [transitions,reset] = useTraceMovement(records, 'key', options );
 
     useRun(() => {
         for (let [i, record] of records.entries()) {

@@ -1,0 +1,18 @@
+dialog{
+  i{
+    font-size: 2em;
+  }
+
+  main{
+    margin: .5em 0;
+  }
+
+  animation: dialog-appear 0.2s ease-out forwards;
+}
+
+@keyframes dialog-appear {
+  from {
+    transform: translateY(-100%);
+    opacity: 0.2;
+  }
+}

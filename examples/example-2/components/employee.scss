@@ -1,0 +1,66 @@
+[name="employee"] {
+  display: flex;
+  align-content: space-between;
+
+  margin: 0 auto;
+  height: 3em;
+  padding: 0.5rem;
+
+  p {
+    height: 40%;
+
+    &:nth-of-type(2n-1) {
+      //font-weight: bold;
+    }
+
+    &:nth-of-type(2n) {
+      color: #888;
+    }
+  }
+
+  [name="employee-avatar"] {
+    border-radius: 50%;
+    width: 3rem;
+    margin: 0 0.5rem 0 0;
+  }
+
+  [name="employee-basic-info"] {
+    inline-size: 7em;
+
+  }
+
+  [name="employee-info"] {
+    flex: 2;
+    align-content: space-around;
+  }
+
+  [name="employee-toolbar"] {
+    flex-flow: row;
+  }
+
+  .info, my-toolbar {
+    display: flex;
+    flex-flow: column wrap;
+    height: 100%;
+    justify-content: center;
+  }
+
+  my-toolbar button {
+    margin: 0 0.5rem;
+    padding: 0rem;
+    font-size: 1.7rem;
+    border-radius: 0.5rem;
+    border: none;
+    background: none;
+    vertical-align: text-bottom;
+
+
+  }
+
+  .pipe {
+    border-left: 0.2rem solid #ccc;
+    display: inline-block;
+    height: 100%;
+  }
+
+}

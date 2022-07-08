@@ -1,0 +1,97 @@
+@import '../common/reset.css';
+/*-----------------------------------------
+basic element
+-----------------------------------------*/
+a {
+  text-transform: lowercase;
+}
+
+button {
+  box-sizing: border-box;
+  height: 3em;
+  padding: 1% 2%;
+  transition: color 200ms ease;
+  border: none;
+  border-radius: .5em;
+  outline: none;
+  background: #ea4c89;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  font-size: .9em;
+  font-weight: 500;
+  line-height: 2em;
+
+  &:hover {
+    cursor: pointer;
+    color: purple;
+  }
+}
+
+form {
+  display: grid;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 30em;
+  row-gap: .1em;
+
+  & > * {
+    box-sizing: border-box;
+  }
+
+  & > label {
+    grid-column: 1/ span 1;
+    text-transform: capitalize;
+  }
+
+  & > input {
+    grid-column: 2/ span 4;
+    line-height: 1.5;
+  }
+}
+/*-----------------------------------------
+
+-----------------------------------------*/
+.app {
+  background-color: #F3F3F5;
+  padding: 2rem;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+
+}
+.app my-toolbar {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+
+  button{
+    align-self: center;
+  }
+}
+
+.app my-toolbar.top{
+  font-size: .5em;
+  flex-direction: row;
+}
+
+
+.list-member{
+  background-color: #FFFFFF
+}
+
+
+
+
+
+button.fancy-button{
+  background-color:#0EC9AE;
+  color:#83F0E2;
+  border-radius:0.5rem;
+  padding:0.5rem 2em;
+  border:none
+}

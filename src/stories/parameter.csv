@@ -1,7 +1,0 @@
-"`tracking`  "|"A Primitive, Object, Array of primitive or array of objects to track change after.                                                   
-If it object or arrays of objects the second argument must provide `key` name to identify the                                        
-object for tracing.                                                                                                                  
-                                                                                                                                     
-If the tracking value is primitive or array of primitives that `key` property can be skipped because the value of each primitive     
-will use as an identify key.                                                                                                         "|"* primitive: `true/false` `0/1/2/3`  `""foo""/ ""bar""`/ 
-* objects : `[{name:'foo',id:1},{name:'bar',id:2}]`  "

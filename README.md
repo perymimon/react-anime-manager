@@ -1,6 +1,6 @@
 ## Welcome to React Animation Manager version 3.0-alpha
 
-Rewrite bottom-up with using clean separate reusable hooks to handle fast changes and calculate dom movement
+Rewrite bottom-up by using clean separate reusable hooks to handle fast changes and calculate dom movement
 
 -------- 
 
@@ -12,9 +12,8 @@ Rewrite bottom-up with using clean separate reusable hooks to handle fast change
 ## What is React-Animation-Manger, and why should I use it?
 
 React-Anime-Manager is a hook approach for React that stabilizes fast-rate of data changes and bring metadata of the
-changes to developer. Now with that metadata you have the chance to made appropriate animation to each JSX object
-created from data's
-item.
+changes to a developer. Now with that metadata, you have the chance to make appropriate animation to each JSX object
+created from the data's item.
 
 ## Features
 
@@ -23,7 +22,7 @@ item.
 * 🚀 Blazing fast builds and performance.
 * 🚚 Data Agnostic.
 * 🥇 React-centric developer experience.
-* 💪 Not using any other npm module beside mine.
+* 💪 Not using any other npm module besides mine.
 
 # Getting Started
 
@@ -33,7 +32,7 @@ item.
 npm i @perymimon/react-anime-manager@alpha.
 ```
 
-Then import it as hook into your component:
+Then import it as a hook into your component:
 
 ## 💻 How it looks like
 
@@ -90,14 +89,14 @@ li[phase="SWAP"][data-after-layout="true"] {
 ```
 
 If you read it carefully you will see that `data` change comes from outside the component, that it.   
-It means `data` can be changed by a user action or by server's response and the animation will occur nicely.
+It means `data` can be changed by a user action or by the server's response and the animation will occur nicely.
 
-Array of [`records`](#1.record) are provides to describe each phase of corresponding item
+An array of [`records`](#1.record) are provided to describe each phase of the corresponding item
 and `transitions()` generator provides to traverse them and let you bring JSX elements to the screen.
 
-In above case `li[phase]` used to tell css the `phase` of the item.
-In response to this the right css-animation can invoke.  
-`dy,dx` used to fine tune the `SWAP` animation and recalculate every time the dom move after cycle of renders occur.
+In the above case `li[phase]` is used to tell CSS the `phase` of the item.
+In response to this, the right CSS animation can invoke.  
+`dy, dx` is used to fine-tune the `SWAP` animation and recalculated every time the dom move after a cycle of renders occur.
 
 For more examples click [here](./examples/).
 
@@ -124,31 +123,30 @@ import {useDataIntersectionWithFuture} from '@perymimon/react-hooks/useDataInter
 
 ## 🖹 Entities
 
-All Hooks rely on three types of entities: `records` , `motion` and the basic `state`
+All Hooks rely on three types of entities: `records`, `motion`, and the basic `state`
 
 #### 1. `record`
 
-Entity `record` is a object that describes tracking item's state. with ability holding the current state and move to
-next one when `done` is called.
+Entity `record` is an object that describes a tracking item's state. with the ability to hold the current state and move to the next one when `done` is called.
 
-* `item` (any): the actual tracked item, piped throw record even if state not changed. It never cache.
-* `key` (string): key of identify the item, result of resolve `key` argument.
-* `from` (number): index of where item was on `tracking` array before that state saved.
-* `to` (number): index of where item was on `tracking` array when that state saved.
+* `item` (any): the actual tracked item, piped throw record even if state not changed. It never caches.
+* `key` (string): a key to identifying the item, the result of the resolve `key` argument.
+* `from` (number): index of where the item was on the `tracking` array before that state was saved.
+* `to` (number): index of where the item was on the `tracking` array when that state was saved.
 * `dom` (DOM element): DOM element of the item. It is provided by `transitions()` generator. but it not set until the
   item is rendered and `moveState` require in the  `transitions()` generator or `onMove` are set as function.
-* `phase` (enum string): indicate the phase of the change. it can be one of the following:
-    * `STAY`: the item is not changed, is still in the same position on `tracking` array, that also the phase after
-      calling `done()` on `APPEAR` & `SWAP` phases.
-    * `APPEAR`: the item is new, it is just added to `tracking` array.
-    * `DISAPPEAR`: the item is just removed from `tracking` array.
-    * `SWAP`: the item is swapped with another item or change position on `tracking` array.
+* `phase` (enum string): indicates the phase of the change. it can be one of the following:
+    * `STAY`: the item is not changed, is still in the same position on the `tracking` array, that is also the phase after
+      calling `done()` on the `APPEAR` & `SWAP` phases.
+    * `APPEAR`: the item is new, it is just added to the `tracking` array.
+    * `DISAPPEAR`: the item is just removed from the `tracking` array.
+    * `SWAP`: the item is swapped with another item or changes position on the `tracking` array.
 * `lastPhase` (enum string): store the last phase before `done()` is called.
 * `done` (callback): function to call without arguments when the animation is done. can be safely
-  destructed from record it remember it's `this` (`{done}=record` syntax).
-* `meta_from` (number): index of where item was in previous `records` array (the one that return from the hook) after
+  destructed from the record it remember it's `this` (`{done}=record` syntax).
+* `meta_from` (number): index of where the item was in the previous `records` array (the one that returns from the hook) after
   last done
-* `meta_to` (number): index of item in the `records` array now ( note, option for future update : reduce from the value
+* `meta_to` (number): index of the item in the `records` array now ( note, option for a future update: reduce from the value
   removed items )
 * `ver` (number):  version of the record, indicate from which `intersection` array it comes from
 
@@ -162,7 +160,7 @@ record = {
 
 #### 2. `motion`
 
-Extra entity that provide to `transitions()` generator and `onMove` function to describe the movement of the item.
+An extra entity that provides to `transitions()` generator and `onMove` function to describe the movement of the item.
 
 * `dom` (dom element): the dom element that created from return JSX. the same as on `record.dom`
 * `dx` (number): the distance moved on the x-axis relative to parent element. (using `offsetLeft` to measure )
@@ -185,7 +183,7 @@ motion = {dom: <div>, dx: 10, dy: 0, isMove: true }
 
 #### 3. `state`
 
-Ancient version of the record entity. the basic object that used to create a record entity.
+An ancient version of the record entity. the basic object that used to create a record entity.
 
 * `item`,
 * `key`,
@@ -205,30 +203,30 @@ There is a couple of exports from the module but for the goal of anime-manager j
 [records, transition] = useAnimeManager(tracking, key, options);
 ```
 
-The main solution of that work. that hook used to trace the data changes. It provides array of `record` one `record` for
+The main solution of that work. that hook used to trace the data changes. It provides array of `records` one `record` for
 each item that `in` or `was` in the tracking argument.
 And `transitions function` to trave the component.
 
-That transition function behave like `records.map` but take care to rerender the callback again with delta movement if
-the dom are moved after phase changed
+That transition function behaves like `records.map` but takes care to rerender the callback again with delta movement if
+the dom is moved after the phase changed
 
-That hook are basically lay on  `useDataIntersectionWithFuture` and `useTraceMovment` and forward the heavy lift to
+That hook is basically laid on  `useDataIntersectionWithFuture` and `useTraceMovment` and forward the heavy lift to
 them.
-it collected there returns and provide clean synchronized API.
+it collected their returns and provide clean synchronized API.
 
 #### arguments
 
-* `tracking`: data to track, can be array of objects or array of primitives or just a single object or primitive (in
-  this case it considers as array with single item).
-  in a case undefined or null, the return value wil be empty array `[]`.
-* `key`: the key name to use to identify each item in the tracking data. if the data is array of objects, the key
-  expected to by sting key name. if the data is array of primitives, the key can be omitted. and the value of the
+* `tracking`: data to track, can be an array of objects or array of primitives, or just a single object or primitive (in
+  this case it considers an array with a single item).
+  in a case undefined or null, the return value will be an empty array `[]`.
+* `key`: the key name to use to identify each item in the tracking data. if the data is an array of objects, the key
+  expected to be a string key name. if the data is an array of primitives, the key can be omitted. and the value of the
   primitive will be used as key.
   the key can be a string with special value `"index"` in that case the index of the item in the tracking data will be
   used as key.
-  the key can be a function that will be invoked on each item `(item,index) => key` and the return value will be used as
+  the key can be a function that will be invoked on each item `(item, index) => key` and the return value will be used as
   key.
-  if key is omitted, the item itself will be used as key.
+  if the key is omitted, the item itself will be used as a key.
   in short:
   ```js
     const getKey = (_ => {
@@ -243,21 +241,20 @@ it collected there returns and provide clean synchronized API.
       component rerender(*).
       The function will be called with the following arguments:
         * `record`: the [record](#record) that done.
-        > note, maybe the timing of invoke `onDone` will change in the future.
+      > note, maybe the timing of invoking `onDone` will change in the future.
 
-    * `skipPhases` (strings): array of `phases` constant to skip on. if `record` going to be set as phase in the array,
-      it auto call done for
-      himself, including call to `onDone`, and continue to the next phase if there is one. it helps to avoid phases that
+    * `skipPhases` (strings): array of `phases` constant to skip on. if `record.phase` is going to be set as one in the `skipPhases` it will auto-call done for
+      himself, including the call to `onDone()`, and continue to the next phase if there is one. it helps to avoid phrases that
       are not wanted to handle.
 
     * `maxAnimationTime` (number): default 1000ms, maximum expected animation's time in milliseconds. After that time
       debug
-      warning will be shown. It should help find `phases` that not handled, the cause of freezing records.
+      warning will be shown. It should help find `phases` that are not handled, the cause of freezing records.
 
-    * `onMove` (callback): optional, function to call when the item is moved. When that callback exists there will no another rerender after
-      the dom move, unless explicit return `true`. the expectation is that `oneMove` will take care of the dom changed.
-      The function will be called after motion are calculated but before jsx rerender, with the following arguments:
-        * `record`: the record that related to the moved dom. 
+    * `onMove` (callback): optional, function to call when the item is moved. When that callback exists there will be no another rerender after
+      the dom move, unless the explicit return is `true`. the expectation is that `oneMove` will take care of the dom changed.
+      The function will be called after motion are calculated but before JSX rerender, with the following arguments:
+        * `record`: the record that related to the moved dom.
         * `motion` (object): as described [above](#motion).
 
 `}`
@@ -315,10 +312,10 @@ options.exportHash = true
     [intersection, hashMap] = useDataIntersection(tracking, key, options, postProcessing);
 ```
 
-The core hook of `useAnimeManager`. It provides the atomic information that describing the changes that each item in
-tracking array has gone through, relative to previous array.
+The core hook of `useAnimeManager`. It provides the atomic information that describes the changes that each item in
+tracking array has gone through, relative to the previous array.
 
-Each atom's intersection called **state**, and it has basically same properties as [record](#record) but without
+Each atom's intersection is called **state**, and it has basically the same properties as [record](#record) but without
 the `done` callback, `meta_from` and `meta_to` properties.
 
 > note, previous in that term mean "after previous `effect` occur", i.e. after committed `render` phase.
@@ -331,7 +328,7 @@ the `done` callback, `meta_from` and `meta_to` properties.
     * `exportHash` (boolean): default false, if true, hook also return the hashmap of the intersection. easy access each
       item but no order
 * `postProcessing` (function([`intersection`](#state), `hashMap`)): optional, function to call after the intersection is calculated.
- 
+
 ```jsx    
  function postProcessing (intersection, hashMap) {
     // do something with the intersection, optionaly return a new/manipulated intersection
@@ -351,14 +348,14 @@ the `done` callback, `meta_from` and `meta_to` properties.
 [records, next] = useDataIntersectionWithFuture(tracking, key, options);
 ```
 
-Lets took the last hook and add buffered memory on it for each `state` to collect the future states but continue return
+Let's take the last hook and add buffered memory on it for each `state` to collect the future states but continue return
 the current one.
-until when ? until callback `next(key)` will called with `key` of a state.
-The meaning of the hook is to bring stability of the last change while avoid future changes to be lost.
+until when ? until callback `next(key)` will be called with the `key` of a state.
+The meaning of the hook is to bring stability to the last change while avoiding future changes being lost.
 
 > `state` with memory will call `record`.
 
-> note, after next(key) called, `record.phase` is seted to be STAY`, forced render, so
+> note, after next(key) called, `record.phase` is set to be STAY`, forced render, so
 > clean up can be made, now `record.phase` will set up to next phase and another render cycle to go.
 
 #### arguments
@@ -380,16 +377,16 @@ The meaning of the hook is to bring stability of the last change while avoid fut
 transitions = useTraceMovement(objects, keyName, options);
 ```
 
-Kind of independent hook, lets say we have a list of objects, call them `records`, and we want to move them on the
+Kind of independent hook, let's say we have a list of objects, call them `records`, and we want to move them on the
 screen between render. but do that with animation.
 we can use this hook to provide the movement knowledge for the animation.
-that hook provides `transitions` function that basically behave like `records.map` but with the addition of
+that hook provides a `transitions` function that basically behaves like `records.map` but with the addition of
 the `motion` object
-and ability to rerender the jsx-generator-callback again for each `record` that is change position (on the render
+and the ability to rerender the JSX-generator-callback again for each `record` that is change position (on the render
 phase _`layoutEffect`_).
 
-> note, rerender not occur if:  
-1. `options.onMove` is a function, and it not returns explicit true.  
+> note, rerender not occur if:
+1. `options.onMove` is a function, and it not returns explicit true.
 2. transition called with callback with one or fewer arguments.
 
 #### arguments

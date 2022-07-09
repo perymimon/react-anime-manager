@@ -10,7 +10,7 @@ Rewrite bottom-up by using clean separate reusable hooks to handle fast changes 
 
 
 ## What is React-Animation-Manger, and why should I use it?
-Are you ever tired of writing a good-looking list of something and then discovering that you cannot easily know which part of the list was updated to make animation on it because the updates come from somewhere else as a fresh-array-of-data-item?   
+Are you ever tired of writing a good-looking list of something and then discovering that you cannot easily know which part of the list was updated to make animation on it because the updates come from somewhere else as a fresh-array-of-data-items?   
 
 And even if you know what will be changed, you still need to write a lot of code to make it work.
 

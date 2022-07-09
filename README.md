@@ -10,10 +10,13 @@ Rewrite bottom-up by using clean separate reusable hooks to handle fast changes 
 
 
 ## What is React-Animation-Manger, and why should I use it?
+Are you ever tired of writing a good-looking list of something and then discovering that you cannot easily know which part of the list was updated to make animation on it because the updates come from somewhere else as a fresh-array-of-data-items?   
 
-React-Anime-Manager is a hook approach for React that stabilizes fast-rate of data changes and bring metadata of the
-changes to a developer. Now with that metadata, you have the chance to make appropriate animation to each JSX object
-created from the data's item.
+And even if you know what will be changed, you still need to write a lot of code to make it work.
+
+And let's not speak about animate things that were removed from the list. How can you possibly animate components that already disappeared in the last render? 
+
+React-Anime-Manager is a Hook approach for React that try to solve this pain by stabilizes fast-rate of data changes and bring metadata of the changes to the Component, with the corresponding data's item of course. With that metadata, you have the chance to make appropriate animation to each JSX object created from that data's item and also be sure that the next update not interrupt your beautiful hand-crafted piece of art animation (or just fade out from opacity 1 to 0 ). 🎇
 
 ## Features
 

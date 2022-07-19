@@ -18,12 +18,12 @@ const META = Symbol('meta');
 export function useAnimeManager(tracking = [], key, options = {}) {
     const {onDone, maxAnimationTime = 1000} = options;
 
-    const handleDone = useCallback(function (record) {
-        record[META].timeoutWarning()
+    options.onDone = useCallback(function (record) {
+        record[META]?.timeoutWarning()
         record.meta_from = record.meta_to;
         onDone?.(record)
-    })
-    options.onDone = handleDone;
+    },[onDone]);
+
     options.exportHash = false;
     options.withRemoved = true;
     // note: records change reference when tracking change, but each record have persisted reference

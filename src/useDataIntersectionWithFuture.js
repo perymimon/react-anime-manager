@@ -14,14 +14,26 @@ const recordTemplate = (key) => ({
     lastPhase: STAY,
     ver: 0,
 })
+function checkSkipPhases(skipPhases) {
+    for( let phase of skipPhases) {
+        if(![DISAPPEAR, SWAP, APPEAR].includes(phase)) {
+            throw new Error(`skipPhases must be one of [DISAPPEAR, SWAP, APPEAR] but got [ ${phase} ]`)
+        }
+    }
+}
 
 // note: array records change reference when tracking change, but each record save reference per tracking id
 export function useDataIntersectionWithFuture(tracking, key, options = {}) {
 
     const {skipPhases = [], onDone} = options
+
+    checkSkipPhases(skipPhases)
+
     const intersection = useDataIntersection(tracking, key, options);
     const {push, shift, peek, map} = useLetMapQueue()
+    
     useDebugValue(map)
+    
     const [forceRender, cacheBuster] = useAsyncForceRender()
     const recordsMap = useLetMap(recordTemplate)
     const records = useRef([]);
@@ -36,7 +48,9 @@ export function useDataIntersectionWithFuture(tracking, key, options = {}) {
         record.lastPhase = record.phase;
         record.phase = STAY;
         records.current = sortedMapValues(recordsMap, intersection[VERSION])
-        onDone?.(record)
+
+        /*if (! skipPhases.includes(record.phase))*/ onDone?.(record)
+
         await forceRender()
         shift(key)
         if (peek(key)) {

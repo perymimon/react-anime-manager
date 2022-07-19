@@ -34,7 +34,6 @@ React-Anime-Manager is a Hook approach for React that try to solve this pain by 
 ```cli
 npm i @perymimon/react-anime-manager@alpha.
 ```
-
 Then import it as a hook into your component:
 
 ## 💻 How it looks like
@@ -94,14 +93,14 @@ li[phase="SWAP"][data-after-layout="true"] {
 If you read it carefully you will see that `data` change comes from outside the component, that it.   
 It means `data` can be changed by a user action or by the server's response and the animation will occur nicely.
 
-An array of [`records`](#1.record) are provided to describe each phase of the corresponding item
+An array of [`records`](#1-record) are provided to describe each phase of the corresponding item
 and `transitions()` generator provides to traverse them and let you bring JSX elements to the screen.
 
 In the above case `li[phase]` is used to tell CSS the `phase` of the item.
 In response to this, the right CSS animation can invoke.  
 `dy, dx` is used to fine-tune the `SWAP` animation and recalculated every time the dom move after a cycle of renders occur.
 
-For more examples click [here](./examples/).
+For more examples click [here](examples).
 
 ## 🖹 module exports
 
@@ -243,7 +242,7 @@ it collected their returns and provide clean synchronized API.
     * `onDone` ( callback(record) ): function to callback when the animation is done after the record updated but before
       component rerender(*).
       The function will be called with the following arguments:
-        * `record`: the [record](#record) that done.
+        * `record`: the [record](#1-record) that done.
       > note, maybe the timing of invoking `onDone` will change in the future.
 
     * `skipPhases` (strings): array of `phases` constant to skip on. if `record.phase` is going to be set as one in the `skipPhases` it will auto-call done for
@@ -258,19 +257,19 @@ it collected their returns and provide clean synchronized API.
       the dom move, unless the explicit return is `true`. the expectation is that `oneMove` will take care of the dom changed.
       The function will be called after motion are calculated but before JSX rerender, with the following arguments:
         * `record`: the record that related to the moved dom.
-        * `motion` (object): as described [above](#motion).
+        * `motion` (object): as described [above](#2-motion).
 
 `}`
 
 #### returns
 
-* `records` ([records](#record)): array of `record` one for each item that `in` or `was` in the tracking argument that
+* `records` ([records](#1-record)): array of `record` one for each item that `in` or `was` in the tracking argument that
   are still handled.
 * `transition` (function(jsxGeneratorCallback): use this function to traverse the `records` and return JSX to render. it
   takes
   the following arguments:
-    * `record`: the current [record](#record) to render
-    * `motion`: the current [motion](#motion) to render
+    * `record`: the current [record](#1-record) to render
+    * `motion`: the current [motion](#2-motion) to render
 
 ```jsx
 function onMove(record, motion) {
@@ -318,7 +317,7 @@ options.exportHash = true
 The core hook of `useAnimeManager`. It provides the atomic information that describes the changes that each item in
 tracking array has gone through, relative to the previous array.
 
-Each atom's intersection is called **state**, and it has basically the same properties as [record](#record) but without
+Each atom's intersection is called **state**, and it has basically the same properties as [record](#1-record) but without
 the `done` callback, `meta_from` and `meta_to` properties.
 
 > note, previous in that term mean "after previous `effect` occur", i.e. after committed `render` phase.
@@ -330,7 +329,7 @@ the `done` callback, `meta_from` and `meta_to` properties.
     * `withRemoved` (boolean): default true, if false, removed items will be ignored and not return.
     * `exportHash` (boolean): default false, if true, hook also return the hashmap of the intersection. easy access each
       item but no order
-* `postProcessing` (function([`intersection`](#state), `hashMap`)): optional, function to call after the intersection is calculated.
+* `postProcessing` (function([`intersection`](#3-state), `hashMap`)): optional, function to call after the intersection is calculated.
 
 ```jsx    
  function postProcessing (intersection, hashMap) {
@@ -341,8 +340,8 @@ the `done` callback, `meta_from` and `meta_to` properties.
 
 #### returns
 
-* `intersection` ([states](#state)): array of states, also the array contain `Symbol(ver)` to track if new version of the intersection was created.
-* `hashMap` (Map object): hashmap of [states](#state). the key is the key of the tracked item and the value is the [state](#state)
+* `intersection` ([states](#3-state)): array of states, also the array contain `Symbol(ver)` to track if new version of the intersection was created.
+* `hashMap` (Map object): hashmap of [states](#3-state). the key is the key of the tracked item and the value is the [state](#3-state)
   object. If `exportHash` is false, this will be undefined.
 
 ### useDataIntersectionWithFuture
